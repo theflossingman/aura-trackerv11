@@ -1,0 +1,184 @@
+{
+  "users": [
+    {
+      "username": "Max",
+      "password": "crocs13",
+      "aura": 0,
+      "role": "admin",
+      "givenAura": {},
+      "netDailyAura": {
+        "Gigi": 500,
+        "Dezi": 500,
+        "Marco": 500,
+        "Sevi": 500
+      },
+      "totalGiven": 4000,
+      "totalReceived": 0,
+      "achievements": [
+        "first_gift",
+        "generous",
+        "super_generous",
+        "mega_generous",
+        "ultra_generous",
+        "philanthropist",
+        "mega_philanthropist"
+      ],
+      "equippedNameTag": "philanthropist",
+      "purchasedBackgrounds": [
+        "ocean_waves"
+      ],
+      "equippedBackground": "ocean_waves",
+      "purchasedNameColors": [],
+      "equippedNameColor": null,
+      "dailyGiven": {},
+      "purchasedNameTags": [],
+      "gems": 20
+    },
+    {
+      "username": "Gigi",
+      "password": "cricut",
+      "aura": 1100,
+      "role": "user",
+      "givenAura": {},
+      "netDailyAura": {
+        "Max": 0
+      },
+      "totalGiven": 0,
+      "totalReceived": 1100,
+      "achievements": [
+        "who_even_are_you",
+        "slightly_known",
+        "lowkey_cool",
+        "getting_noticed",
+        "kinda_him",
+        "respectable",
+        "solid_reputation",
+        "rising_star",
+        "main_character_loading",
+        "certified_him",
+        "big_w_energy"
+      ],
+      "equippedNameTag": null,
+      "purchasedBackgrounds": [],
+      "equippedBackground": null,
+      "purchasedNameColors": [],
+      "equippedNameColor": null,
+      "purchasedCardShapes": [
+        "circle",
+        "star"
+      ],
+      "equippedCardShape": "star",
+      "dailyGiven": {},
+      "purchasedNameTags": [],
+      "gems": 0
+    },
+    {
+      "username": "Marco",
+      "password": "pig",
+      "aura": 1000,
+      "role": "user",
+      "givenAura": {
+        "Max": 250
+      },
+      "netDailyAura": {},
+      "totalGiven": 0,
+      "totalReceived": 1000,
+      "achievements": [
+        "who_even_are_you",
+        "slightly_known",
+        "lowkey_cool",
+        "getting_noticed",
+        "kinda_him",
+        "respectable",
+        "solid_reputation",
+        "rising_star",
+        "main_character_loading",
+        "certified_him",
+        "big_w_energy"
+      ],
+      "equippedNameTag": null,
+      "purchasedBackgrounds": [],
+      "purchasedNameColors": [],
+      "equippedBackground": null,
+      "equippedNameColor": null,
+      "dailyGiven": {},
+      "purchasedNameTags": [],
+      "gems": 0
+    },
+    {
+      "username": "Dezi",
+      "password": "diddy",
+      "aura": 1000,
+      "role": "user",
+      "givenAura": {
+        "Max": 125,
+        "Marco": 500
+      },
+      "netDailyAura": {
+        "Max": 0,
+        "Gigi": 0,
+        "Marco": 0
+      },
+      "totalGiven": 100,
+      "totalReceived": 1000,
+      "achievements": [
+        "first_gift",
+        "generous",
+        "super_generous",
+        "who_even_are_you",
+        "slightly_known",
+        "lowkey_cool",
+        "getting_noticed",
+        "kinda_him",
+        "respectable",
+        "solid_reputation",
+        "rising_star",
+        "main_character_loading",
+        "certified_him",
+        "big_w_energy"
+      ],
+      "equippedNameTag": "small_w_support",
+      "purchasedBackgrounds": [],
+      "equippedBackground": null,
+      "purchasedNameColors": [],
+      "equippedNameColor": null,
+      "dailyGiven": {},
+      "purchasedNameTags": [],
+      "gems": 8
+    },
+    {
+      "username": "Sevi",
+      "password": "unicorn",
+      "aura": 1000,
+      "role": "user",
+      "givenAura": {
+        "Max": 50
+      },
+      "netDailyAura": {},
+      "totalGiven": 0,
+      "totalReceived": 1000,
+      "achievements": [
+        "who_even_are_you",
+        "slightly_known",
+        "lowkey_cool",
+        "getting_noticed",
+        "kinda_him",
+        "respectable",
+        "solid_reputation",
+        "rising_star",
+        "main_character_loading",
+        "certified_him",
+        "big_w_energy"
+      ],
+      "purchasedBackgrounds": [],
+      "purchasedNameColors": [],
+      "equippedBackground": null,
+      "equippedNameColor": null,
+      "equippedNameTag": null,
+      "dailyGiven": {},
+      "purchasedNameTags": [],
+      "gems": 0
+    }
+  ],
+  "announcement": "its finally here the AURA TRACKER. finally after 5 looong days of frustration the v1 of the aura tracker is here. WAYYY more to come in the future."
+}

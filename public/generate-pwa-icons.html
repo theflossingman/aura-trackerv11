@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Generate PWA Icons</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #1a1a1a; color: white; padding: 20px; }
+        .icon-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin: 20px 0; }
+        .icon-item { text-align: center; background: #2a2a2a; padding: 15px; border-radius: 10px; }
+        canvas { border: 2px solid #4A90E2; border-radius: 5px; background: white; }
+        button { background: #4A90E2; color: white; border: none; padding: 15px 30px; border-radius: 8px; cursor: pointer; font-size: 16px; margin: 10px 5px; }
+        button:hover { background: #357ABD; }
+        .preview { display: flex; gap: 15px; flex-wrap: wrap; justify-content: center; margin: 20px 0; }
+        .instructions { background: rgba(74, 144, 226, 0.2); padding: 20px; border-radius: 10px; margin: 20px 0; }
+    </style>
+</head>
+<body>
+    <h1>🏆 Aura PWA Icon Generator</h1>
+    
+    <div class="instructions">
+        <h3>📱 Complete PWA Icon Setup</h3>
+        <p>• Dashboard gradient background</p>
+        <p>• Trophy in center with "A" for Aura</p>
+        <p>• All iOS & Android sizes</p>
+        <p>• One-click download all icons</p>
+    </div>
+    
+    <button onclick="generateAllIcons()">🚀 Generate All PWA Icons</button>
+    <button onclick="generatePreview()">👁️ Preview Only</button>
+    
+    <div class="preview" id="preview"></div>
+    
+    <div class="icon-grid" id="iconGrid"></div>
+
+    <script>
+        const sizes = [
+            { name: 'Android/Chrome', size: 192, filename: 'icon-192x192.png' },
+            { name: 'Android/Chrome', size: 512, filename: 'icon-512x512.png' },
+            { name: 'iOS', size: 180, filename: 'apple-touch-icon.png' },
+            { name: 'iOS', size: 152, filename: 'icon-152x152.png' },
+            { name: 'iOS', size: 144, filename: 'icon-144x144.png' },
+            { name: 'iOS', size: 120, filename: 'icon-120x120.png' },
+            { name: 'iOS', size: 114, filename: 'icon-114x114.png' },
+            { name: 'iOS', size: 76, filename: 'icon-76x76.png' },
+            { name: 'iOS', size: 72, filename: 'icon-72x72.png' },
+            { name: 'iOS', size: 60, filename: 'icon-60x60.png' },
+            { name: 'iOS', size: 57, filename: 'icon-57x57.png' },
+            { name: 'Favicon', size: 32, filename: 'favicon-32x32.png' },
+            { name: 'Favicon', size: 16, filename: 'favicon-16x16.png' }
+        ];
+
+        function drawAuraIcon(size) {
+            const canvas = document.createElement('canvas');
+            canvas.width = size;
+            canvas.height = size;
+            const ctx = canvas.getContext('2d');
+            
+            // Dashboard gradient background
+            const gradient = ctx.createLinearGradient(0, 0, size, size);
+            gradient.addColorStop(0, '#87CEEB');      // Sky blue
+            gradient.addColorStop(0.25, '#9B59B6');   // Purple  
+            gradient.addColorStop(0.5, '#4A90E2');   // Blue
+            gradient.addColorStop(0.75, '#9B59B6');   // Purple
+            gradient.addColorStop(1, '#87CEEB');      // Sky blue
+            
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, size, size);
+            
+            // Add subtle overlay for depth
+            const overlayGradient = ctx.createRadialGradient(size/2, size/2, 0, size/2, size/2, size/2);
+            overlayGradient.addColorStop(0, 'rgba(255, 255, 255, 0.1)');
+            overlayGradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+            
+            ctx.fillStyle = overlayGradient;
+            ctx.fillRect(0, 0, size, size);
+            
+            // Draw trophy
+            const centerX = size / 2;
+            const centerY = size / 2;
+            const trophySize = size * 0.4;
+            
+            // Trophy cup with gold gradient
+            const cupGradient = ctx.createLinearGradient(centerX - trophySize/2, centerY - trophySize/3, centerX + trophySize/2, centerY + trophySize/3);
+            cupGradient.addColorStop(0, '#FFD700');      // Gold
+            cupGradient.addColorStop(0.5, '#FFA500');     // Orange  
+            cupGradient.addColorStop(1, '#FFD700');      // Gold
+            
+            ctx.fillStyle = cupGradient;
+            ctx.strokeStyle = '#B8860B';  // Dark gold outline
+            ctx.lineWidth = Math.max(1, size * 0.02);
+            
+            // Trophy cup shape
+            ctx.beginPath();
+            ctx.moveTo(centerX - trophySize/2, centerY - trophySize/3);
+            ctx.lineTo(centerX - trophySize/3, centerY + trophySize/4);
+            ctx.lineTo(centerX + trophySize/3, centerY + trophySize/4);
+            ctx.lineTo(centerX + trophySize/2, centerY - trophySize/3);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+            
+            // Trophy handles (only for larger icons)
+            if (size >= 72) {
+                ctx.beginPath();
+                ctx.arc(centerX - trophySize/2.2, centerY - trophySize/6, trophySize/8, Math.PI * 0.2, Math.PI * 1.8, true);
+                ctx.stroke();
+                
+                ctx.beginPath();
+                ctx.arc(centerX + trophySize/2.2, centerY - trophySize/6, trophySize/8, Math.PI * 1.2, Math.PI * 0.8, true);
+                ctx.stroke();
+            }
+            
+            // Trophy base
+            ctx.fillStyle = '#CD853F';  // Peru/golden brown
+            ctx.fillRect(centerX - trophySize/6, centerY + trophySize/4, trophySize/3, trophySize/8);
+            
+            // Trophy bottom base
+            ctx.fillRect(centerX - trophySize/4, centerY + trophySize/3, trophySize/2, trophySize/12);
+            
+            // Add shine effect
+            const shineGradient = ctx.createLinearGradient(centerX - trophySize/3, centerY - trophySize/3, centerX, centerY);
+            shineGradient.addColorStop(0, 'rgba(255, 255, 255, 0.4)');
+            shineGradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+            
+            ctx.fillStyle = shineGradient;
+            ctx.beginPath();
+            ctx.moveTo(centerX - trophySize/3, centerY - trophySize/3);
+            ctx.lineTo(centerX - trophySize/4, centerY);
+            ctx.lineTo(centerX - trophySize/6, centerY - trophySize/4);
+            ctx.closePath();
+            ctx.fill();
+            
+            // Add "A" for Aura (only for larger icons)
+            if (size >= 72) {
+                ctx.fillStyle = '#FFFFFF';
+                ctx.font = `bold ${size * 0.15}px Arial`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('A', centerX, centerY - trophySize/12);
+            }
+            
+            // Add glow around trophy
+            const glowGradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, trophySize);
+            glowGradient.addColorStop(0, 'rgba(255, 215, 0, 0.2)');
+            glowGradient.addColorStop(1, 'rgba(255, 215, 0, 0)');
+            
+            ctx.fillStyle = glowGradient;
+            ctx.fillRect(0, 0, size, size);
+            
+            return canvas;
+        }
+
+        function generatePreview() {
+            const previewDiv = document.getElementById('preview');
+            previewDiv.innerHTML = '';
+            
+            // Show main sizes
+            [192, 512].forEach(size => {
+                const canvas = drawAuraIcon(size);
+                const div = document.createElement('div');
+                div.style.textAlign = 'center';
+                div.innerHTML = `<canvas id="preview${size}" width="${size}" height="${size}"></canvas><p>${size}x${size}</p>`;
+                previewDiv.appendChild(div);
+                
+                const previewCanvas = document.getElementById(`preview${size}`);
+                const ctx = previewCanvas.getContext('2d');
+                ctx.drawImage(canvas, 0, 0);
+            });
+        }
+
+        function generateAllIcons() {
+            const iconGrid = document.getElementById('iconGrid');
+            iconGrid.innerHTML = '';
+            
+            sizes.forEach(iconInfo => {
+                const canvas = drawAuraIcon(iconInfo.size);
+                
+                const item = document.createElement('div');
+                item.className = 'icon-item';
+                item.innerHTML = `
+                    <h4>${iconInfo.name}</h4>
+                    <canvas id="icon${iconInfo.size}" width="${iconInfo.size}" height="${iconInfo.size}"></canvas>
+                    <p>${iconInfo.size}x${iconInfo.size}</p>
+                    <p>${iconInfo.filename}</p>
+                    <button onclick="downloadIcon(${iconInfo.size}, '${iconInfo.filename}')">Download</button>
+                `;
+                iconGrid.appendChild(item);
+                
+                // Draw the icon
+                const iconCanvas = document.getElementById(`icon${iconInfo.size}`);
+                const ctx = iconCanvas.getContext('2d');
+                ctx.drawImage(canvas, 0, 0);
+            });
+        }
+
+        function downloadIcon(size, filename) {
+            const canvas = document.getElementById(`icon${size}`);
+            canvas.toBlob(blob => {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                a.click();
+                URL.revokeObjectURL(url);
+            });
+        }
+
+        // Auto-generate preview on load
+        window.onload = () => generatePreview();
+    </script>
+</body>
+</html>

@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Quick PWA Icon Generator</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #1a1a1a; color: white; padding: 20px; text-align: center; }
+        .preview { display: flex; gap: 20px; justify-content: center; margin: 20px 0; flex-wrap: wrap; }
+        canvas { border: 2px solid #4A90E2; border-radius: 8px; background: white; }
+        button { background: #4A90E2; color: white; border: none; padding: 15px 30px; border-radius: 8px; cursor: pointer; font-size: 16px; margin: 10px; }
+        button:hover { background: #357ABD; }
+        .icon-list { background: #2a2a2a; padding: 20px; border-radius: 10px; margin: 20px 0; max-height: 400px; overflow-y: auto; }
+        .icon-item { display: inline-block; margin: 10px; padding: 10px; background: #3a3a3a; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <h1>🏆 Quick PWA Icon Generator</h1>
+    <p>Dashboard gradient + Trophy design</p>
+    
+    <button onclick="generateAllIcons()">🚀 Generate All Icons</button>
+    <button onclick="downloadAll()">📥 Download All</button>
+    
+    <div class="preview">
+        <div>
+            <canvas id="preview192" width="192" height="192"></canvas>
+            <p>192x192 (Main)</p>
+        </div>
+        <div>
+            <canvas id="preview512" width="512" height="512"></canvas>
+            <p>512x512 (High-Res)</p>
+        </div>
+    </div>
+    
+    <div class="icon-list" id="iconList"></div>
+
+    <script>
+        const icons = [];
+        
+        function createTrophyIcon(size) {
+            const canvas = document.createElement('canvas');
+            canvas.width = size;
+            canvas.height = size;
+            const ctx = canvas.getContext('2d');
+            
+            // Dashboard gradient background
+            const gradient = ctx.createLinearGradient(0, 0, size, size);
+            gradient.addColorStop(0, '#87CEEB');      // Sky blue
+            gradient.addColorStop(0.25, '#9B59B6');   // Purple  
+            gradient.addColorStop(0.5, '#4A90E2');   // Blue
+            gradient.addColorStop(0.75, '#9B59B6');   // Purple
+            gradient.addColorStop(1, '#87CEEB');      // Sky blue
+            
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, size, size);
+            
+            // Draw trophy
+            const centerX = size / 2;
+            const centerY = size / 2;
+            const trophySize = size * 0.4;
+            
+            // Trophy cup with gold gradient
+            const cupGradient = ctx.createLinearGradient(centerX - trophySize/2, centerY - trophySize/3, centerX + trophySize/2, centerY + trophySize/3);
+            cupGradient.addColorStop(0, '#FFD700');      // Gold
+            cupGradient.addColorStop(0.5, '#FFA500');     // Orange  
+            cupGradient.addColorStop(1, '#FFD700');      // Gold
+            
+            ctx.fillStyle = cupGradient;
+            ctx.strokeStyle = '#B8860B';  // Dark gold outline
+            ctx.lineWidth = Math.max(1, size * 0.02);
+            
+            // Trophy cup shape
+            ctx.beginPath();
+            ctx.moveTo(centerX - trophySize/2, centerY - trophySize/3);
+            ctx.lineTo(centerX - trophySize/3, centerY + trophySize/4);
+            ctx.lineTo(centerX + trophySize/3, centerY + trophySize/4);
+            ctx.lineTo(centerX + trophySize/2, centerY - trophySize/3);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+            
+            // Trophy handles (only for larger icons)
+            if (size >= 72) {
+                ctx.beginPath();
+                ctx.arc(centerX - trophySize/2.2, centerY - trophySize/6, trophySize/8, Math.PI * 0.2, Math.PI * 1.8, true);
+                ctx.stroke();
+                
+                ctx.beginPath();
+                ctx.arc(centerX + trophySize/2.2, centerY - trophySize/6, trophySize/8, Math.PI * 1.2, Math.PI * 0.8, true);
+                ctx.stroke();
+            }
+            
+            // Trophy base
+            ctx.fillStyle = '#CD853F';  // Peru/golden brown
+            ctx.fillRect(centerX - trophySize/6, centerY + trophySize/4, trophySize/3, trophySize/8);
+            
+            // Trophy bottom base
+            ctx.fillRect(centerX - trophySize/4, centerY + trophySize/3, trophySize/2, trophySize/12);
+            
+            // Add "A" for Aura (only for larger icons)
+            if (size >= 72) {
+                ctx.fillStyle = '#FFFFFF';
+                ctx.font = `bold ${size * 0.15}px Arial`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('A', centerX, centerY - trophySize/12);
+            }
+            
+            // Add glow around trophy
+            const glowGradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, trophySize);
+            glowGradient.addColorStop(0, 'rgba(255, 215, 0, 0.2)');
+            glowGradient.addColorStop(1, 'rgba(255, 215, 0, 0)');
+            
+            ctx.fillStyle = glowGradient;
+            ctx.fillRect(0, 0, size, size);
+            
+            return canvas;
+        }
+
+        function generateAllIcons() {
+            const sizes = [
+                { size: 192, name: 'icon-192x192.png' },
+                { size: 512, name: 'icon-512x512.png' },
+                { size: 180, name: 'apple-touch-icon.png' },
+                { size: 152, name: 'icon-152x152.png' },
+                { size: 144, name: 'icon-144x144.png' },
+                { size: 128, name: 'icon-128x128.png' },
+                { size: 120, name: 'icon-120x120.png' },
+                { size: 114, name: 'icon-114x114.png' },
+                { size: 96, name: 'icon-96x96.png' },
+                { size: 76, name: 'icon-76x76.png' },
+                { size: 72, name: 'icon-72x72.png' },
+                { size: 60, name: 'icon-60x60.png' },
+                { size: 57, name: 'icon-57x57.png' },
+                { size: 32, name: 'favicon-32x32.png' },
+                { size: 16, name: 'favicon-16x16.png' },
+                { size: 32, name: 'favicon.png' }
+            ];
+            
+            icons.length = 0;
+            const iconList = document.getElementById('iconList');
+            iconList.innerHTML = '<h3>Generated Icons:</h3>';
+            
+            sizes.forEach(iconInfo => {
+                const canvas = createTrophyIcon(iconInfo.size);
+                icons.push({ canvas, filename: iconInfo.name });
+                
+                const item = document.createElement('div');
+                item.className = 'icon-item';
+                item.innerHTML = `<canvas id="icon${iconInfo.size}" width="60" height="60"></canvas><br>${iconInfo.name}`;
+                iconList.appendChild(item);
+                
+                const miniCanvas = document.getElementById(`icon${iconInfo.size}`);
+                const ctx = miniCanvas.getContext('2d');
+                ctx.drawImage(canvas, 0, 0, 60, 60);
+            });
+            
+            // Update main previews
+            const preview192 = document.getElementById('preview192');
+            const preview512 = document.getElementById('preview512');
+            const ctx192 = preview192.getContext('2d');
+            const ctx512 = preview512.getContext('2d');
+            
+            ctx192.drawImage(createTrophyIcon(192), 0, 0);
+            ctx512.drawImage(createTrophyIcon(512), 0, 0);
+        }
+
+        function downloadAll() {
+            icons.forEach(icon => {
+                icon.canvas.toBlob(blob => {
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = icon.filename;
+                    a.click();
+                    URL.revokeObjectURL(url);
+                });
+            });
+        }
+
+        // Auto-generate on load
+        window.onload = () => generateAllIcons();
+    </script>
+</body>
+</html>

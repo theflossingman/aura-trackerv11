@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  aura-tracker:
+    image: ghcr.io/theflossingman/aura-trackerv4:latest
+    container_name: aura-tracker
+    restart: unless-stopped
+    ports:
+      - "3040:3040"
+    volumes:
+      # Mount data directory for persistence - update this path for your system
+      - ./data:/app/data
+      # Alternative: Use absolute path like - /path/to/your/data:/app/data
+      # For Synology: - /volume1/docker/aura-tracker/data:/app/data
+    environment:
+      - NODE_ENV=production
+      - PORT=3040
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3040/api/users', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - aura-network
+
+networks:
+  aura-network:
+    driver: bridge

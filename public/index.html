@@ -1,0 +1,4491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#4A90E2">
+<title>Aura Tracker</title>
+<link rel="manifest" href="/manifest.json">
+<!-- Favicon -->
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="icon" type="image/png" href="/favicon.png">
+<!-- Apple Touch Icons -->
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="152x152" href="/icon-152x152.png">
+<link rel="apple-touch-icon" sizes="144x144" href="/icon-144x144.png">
+<link rel="apple-touch-icon" sizes="120x120" href="/icon-120x120.png">
+<link rel="apple-touch-icon" sizes="114x114" href="/icon-114x114.png">
+<link rel="apple-touch-icon" sizes="76x76" href="/icon-76x76.png">
+<link rel="apple-touch-icon" sizes="72x72" href="/icon-72x72.png">
+<link rel="apple-touch-icon" sizes="60x60" href="/icon-60x60.png">
+<link rel="apple-touch-icon" sizes="57x57" href="/icon-57x57.png">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+  /* --- GLOBAL STYLES --- */
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
+  html {
+    background: linear-gradient(135deg, #87CEEB, #9B59B6, #4A90E2);
+    background-size: 400% 400%;
+    animation: gradientShift 15s ease infinite;
+    background-attachment: fixed;
+    background-color: #4A90E2;
+    height: 100%;
+    min-height: 100vh;
+  }
+  body { 
+    background: linear-gradient(135deg, #87CEEB, #9B59B6, #4A90E2);
+    background-size: 400% 400%;
+    animation: gradientShift 15s ease infinite;
+    background-attachment: fixed;
+    min-height: 100vh;
+    height: 100dvh; /* dynamic viewport height */
+    overflow: hidden;
+    margin: 0;
+    padding: 0;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #4A90E2; /* added fallback background color */
+  }
+  
+  @keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  /* --- GLASS LOGIN --- */
+  #loginContainer { backdrop-filter: blur(12px); background-color: rgba(255,255,255,0.1); padding:40px; border-radius:15px; display:flex; flex-direction:column; align-items:center; width:300px; box-shadow: 0 0 20px rgba(0,0,0,0.3); }
+  #loginContainer h1 { 
+    color:white; 
+    margin-bottom:20px; 
+    text-shadow: 0 0 10px rgba(0,0,0,0.5);
+    font-family: 'Bangers', 'Permanent Marker', 'Luckiest Guy', sans-serif;
+    font-size: 2.2rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    background: linear-gradient(135deg, #FFD700, #FFA500, #FF8C00);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-transform: uppercase;
+    animation: glow 2s ease-in-out infinite alternate;
+  }
+  #loginContainer input { width:100%; padding:10px; margin:5px 0; border-radius:8px; border:none; outline:none; }
+  #loginContainer button { padding:10px 20px; margin-top:15px; border:none; border-radius:8px; background: #00f6ff; color:#000; font-weight:bold; cursor:pointer; transition: 0.2s; }
+  #loginContainer button:hover { background:#00c0cc; }
+
+  /* --- DASHBOARD --- */
+  #dashboard { 
+    display:none; 
+    flex-direction:column; 
+    height:100vh; 
+    width:100vw; 
+    color:white;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    overflow: hidden;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  
+  /* Mobile-first responsive design */
+  @media (max-width: 768px) {
+    body {
+      align-items: center;
+      padding: 0;
+    }
+    
+    #loginContainer {
+      width: 90%;
+      max-width: 350px;
+      margin: 20px auto;
+      padding: 30px 20px;
+    }
+    
+    #topBar {
+      padding: 10px 15px;
+      flex-direction: column;
+      gap: 10px;
+      text-align: center;
+    }
+    
+    #topBar h2 {
+      font-size: 1.5rem;
+      margin: 0;
+    }
+    
+    #achievementsBtn {
+      font-size: 0.9rem;
+      padding: 6px 12px;
+    }
+    
+    #cardsContainer {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 15px;
+      padding: 20px 15px;
+      max-width: 100%;
+    }
+    
+    .userCard {
+      height: 160px;
+      padding: 15px;
+    }
+    
+    .user-name {
+      font-size: 1.4rem;
+    }
+    
+    .aura-count {
+      font-size: 1.8rem;
+    }
+    
+    #slidePanel {
+      width: 95%;
+      max-width: 400px;
+      height: 400px;
+      bottom: -420px;
+    }
+    
+    #bottomLeft {
+      bottom: 15px;
+      left: 15px;
+      right: 15px;
+      justify-content: center;
+      gap: 15px;
+    }
+    
+    #bottomLeft button {
+      flex: 1;
+      max-width: 150px;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    #cardsContainer {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      padding: 15px 10px;
+      max-width: 100%;
+    }
+    
+    .userCard {
+      height: 140px;
+      padding: 12px;
+    }
+    
+    .user-name {
+      font-size: 1.2rem;
+    }
+    
+    .aura-count {
+      font-size: 1.6rem;
+    }
+    
+    #slidePanel {
+      width: 100%;
+      border-radius: 20px 20px 0 0;
+    }
+  }
+  #topBar { display:flex; justify-content:space-between; align-items:center; padding:15px 30px; background: rgba(255,255,255,0.1); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255,255,255,0.2); }
+  #cardsContainer { 
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    padding:30px;
+    justify-content: center;
+    align-content: start;
+    flex:1;
+    overflow-y: auto;
+    max-width: 800px;
+    margin: 0 auto;
+    min-height: 0;
+  }
+  
+  .userCard { 
+    background: rgba(255,255,255,0.15);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255,255,255,0.3);
+    padding: 20px;
+    border-radius: 12px;
+    cursor: pointer;
+    text-align: center;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+    transition: all 0.3s ease;
+    position: relative;
+    height: 180px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 8px;
+    min-height: 160px;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .userCard.has-background {
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(255,255,255,0.4);
+  }
+  
+  .userCard::before {
+    content: '';
+    position: absolute;
+    top: 1px;
+    left: 1px;
+    right: 1px;
+    height: 4px;
+    background: linear-gradient(90deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #feca57);
+    transform: scaleX(0);
+    transform-origin: center;
+    transition: transform 0.4s ease;
+    border-radius: 11px 11px 0 0;
+  }
+  
+  .userCard:hover::before {
+    transform: scaleX(1);
+  }
+  
+  .userCard:hover { 
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+    background: rgba(255,255,255,0.25);
+    border-color: rgba(255,255,255,0.5);
+  }
+  
+  .userCard:active {
+    transform: translateY(-2px) scale(1.01);
+    transition: all 0.1s ease;
+  }
+  
+  .user-avatar {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 5px;
+  }
+  .user-name {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: white;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  }
+  
+  .user-aura {
+    margin-bottom: 4px;
+    text-shadow: none;
+  }
+  
+  .user-gems {
+    margin-bottom: 4px;
+    text-shadow: none;
+  }
+  
+  .aura-label {
+    font-size: 1rem;
+    font-weight: 600;
+    color: white;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  }
+  
+  .gems-label {
+    font-size: 1rem;
+    font-weight: 600;
+    color: white;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  }
+  
+  .aura-count {
+    font-size: 2.2rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #feca57, #ff6b6b);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  .gems-count {
+    font-size: 1.8rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #00d4ff, #0099ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  .user-role {
+    display: inline-block;
+    padding: 2px 6px;
+    border-radius: 6px;
+    font-size: 0.6rem;
+    font-weight: 500;
+    background: rgba(255,255,255,0.2);
+    color: white;
+    border: 1px solid rgba(255,255,255,0.3);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  
+  .user-role.admin {
+    background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+    border-color: rgba(255, 107, 107, 0.5);
+  }
+
+  .user-name-tag {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #ffd700;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+    margin-top: 4px;
+    padding: 2px 8px;
+    border-radius: 12px;
+    background: rgba(255,215,0,0.2);
+    border: 1px solid rgba(255,215,0,0.4);
+    text-align: center;
+  }
+
+  .name-tag-card {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 12px;
+    padding: 15px;
+    margin: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+    position: relative;
+  }
+
+  .name-tag-card:hover {
+    background: rgba(255,255,255,0.2);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+  }
+
+  .name-tag-card.equipped {
+    background: rgba(255,215,0,0.2);
+    border-color: gold;
+    box-shadow: 0 0 20px rgba(255,215,0,0.3);
+  }
+
+  .name-tag-status {
+    font-size: 24px;
+    margin-bottom: 8px;
+  }
+
+  .name-tag-name {
+    font-weight: bold;
+    color: white;
+    margin-bottom: 5px;
+    font-size: 0.9rem;
+  }
+
+  .name-tag-description {
+    font-size: 0.8rem;
+    color: rgba(255,255,255,0.7);
+    margin-bottom: 10px;
+  }
+
+  .equip-btn {
+    background: linear-gradient(135deg, #00f6ff, #00c0cc);
+    border: none;
+    border-radius: 8px;
+    padding: 8px 16px;
+    color: #000;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.8rem;
+  }
+
+  .equip-btn:hover {
+    background: linear-gradient(135deg, #00c0cc, #00a0aa);
+    transform: scale(1.05);
+  }
+
+  .customization-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    border-bottom: 2px solid rgba(255,255,255,0.1);
+  }
+
+  .customization-tab-btn {
+    background: transparent;
+    border: none;
+    color: rgba(255,255,255,0.7);
+    padding: 10px 20px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    border-bottom: 2px solid transparent;
+  }
+
+  .customization-tab-btn.active {
+    color: #00f6ff;
+    border-bottom-color: #00f6ff;
+  }
+
+  .customization-tab-btn:hover {
+    color: #00f6ff;
+  }
+
+  .customization-tab-content {
+    display: none;
+  }
+
+  .customization-tab-content.active {
+    display: block;
+  }
+
+  #nameTagGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 12px;
+    max-height: 400px;
+    overflow-y: auto;
+    padding: 10px;
+  }
+
+  .unequip-all-btn {
+    background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+    border: none;
+    border-radius: 8px;
+    padding: 8px 16px;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.8rem;
+  }
+
+  .unequip-all-btn:hover {
+    background: linear-gradient(135deg, #ee5a24, #c44569);
+    transform: scale(1.05);
+  }
+
+  /* --- SLIDE PANEL --- */
+  #slidePanel { 
+    position:fixed; 
+    bottom: -450px; 
+    left: 50%; 
+    transform: translateX(-50%); 
+    width: 90%; 
+    max-width: 350px;
+    height: 400px;
+    background: rgba(0,0,0,0.95); 
+    backdrop-filter: blur(15px); 
+    transition: bottom 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55); 
+    padding:20px; 
+    overflow-y:auto; 
+    border-radius: 20px 20px 0 0; 
+    box-shadow: 0 -10px 40px rgba(0,0,0,0.4);
+    z-index: 1000;
+  }
+  #slidePanel.open { bottom: 0; }
+  #slidePanel h2 { margin-bottom:15px; }
+  .tabBtns { display:flex; gap:10px; margin-bottom:15px; }
+  .tabBtns button { flex:1; padding:10px; border:none; border-radius:8px; cursor:pointer; background:#00f6ff; color:#000; font-weight:bold; transition:0.2s; }
+  .tabBtns button.active { background:#00c0cc; }
+  .tabContent { display:none; }
+  .tabContent.active { display:block; }
+  .actionBtn { width:100%; padding:10px; margin:5px 0; border:none; border-radius:8px; cursor:pointer; background:#00f6ff; color:#000; font-weight:bold; transition:0.2s; }
+  .actionBtn:hover { background:#00c0cc; }
+
+  /* --- CHART STYLING --- */
+  #graphTab {
+    padding: 10px;
+    height: 250px;
+  }
+
+  #auraChart {
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  /* --- LOGOUT + SETTINGS --- */
+  #bottomLeft { 
+    position:fixed; 
+    bottom:20px; 
+    left:20px; 
+    right:20px;
+    display:flex; 
+    gap:10px; 
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  #bottomLeft button { 
+    padding:12px 20px; 
+    border:none; 
+    border-radius:8px; 
+    cursor:pointer; 
+    font-weight:bold; 
+    background:#00f6ff; 
+    color:#000; 
+    transition:0.2s;
+    min-height: 44px;
+    min-width: 44px;
+    touch-action: manipulation;
+  }
+  #bottomLeft button:hover { background:#00c0cc; }
+
+  /* --- LOGIN ANIMATIONS --- */
+  #loginContainer.shake {
+    animation: shake 0.5s ease-in-out;
+  }
+  
+  #loginContainer.success {
+    animation: loginSuccess 0.5s ease-out forwards;
+  }
+  
+  @keyframes loginSuccess {
+    0% {
+      transform: scale(1) rotate(0deg);
+      opacity: 1;
+    }
+    50% {
+      transform: scale(1.2) rotate(180deg);
+      opacity: 0.8;
+    }
+    100% {
+      transform: scale(0) rotate(360deg);
+      opacity: 0;
+    }
+  }
+  
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-10px); }
+    20%, 40%, 60%, 80% { transform: translateX(10px); }
+  }
+  
+  .dumb-message {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(255, 0, 0, 0.9);
+    color: white;
+    padding: 20px 30px;
+    border-radius: 15px;
+    font-size: 24px;
+    font-weight: bold;
+    z-index: 1000;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  
+  .dumb-message.show {
+    opacity: 1;
+  }
+
+  /* --- LIVE NOTIFICATIONS --- */
+  .live-notification {
+    position: fixed;
+    top: 80px;
+    right: 20px;
+    z-index: 3001;
+    pointer-events: none;
+    opacity: 0;
+    transform: translateX(100%);
+    transition: all 0.3s ease;
+    max-width: 320px;
+  }
+  
+  .live-notification.show {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  
+  .live-notification-content {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 15px 20px;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 500;
+  }
+  
+  .live-notification-icon {
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+  
+  .live-notification-message {
+    flex: 1;
+    line-height: 1.4;
+  }
+
+  /* --- MARKETPLACE STYLES --- */
+  .marketplace-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    border-bottom: 2px solid rgba(255,255,255,0.1);
+    padding-bottom: 10px;
+  }
+
+  .marketplace-tab-btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px 8px 0 0;
+    background: rgba(255,165,0,0.2);
+    color: orange;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    font-size: 16px;
+  }
+
+  .marketplace-tab-btn:hover {
+    background: rgba(255,165,0,0.3);
+  }
+
+  .marketplace-tab-btn.active {
+    background: rgba(255,165,0,0.4);
+    border-bottom: 2px solid orange;
+  }
+
+  .marketplace-tab-content {
+    display: none;
+  }
+
+  .marketplace-tab-content.active {
+    display: block;
+  }
+
+  #marketplaceBackgroundsGrid, #backgroundsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 12px;
+    max-height: 400px;
+    overflow-y: auto;
+    padding: 10px;
+  }
+
+  #marketplaceNameColorsGrid, #nameColorsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 12px;
+    max-height: 400px;
+    overflow-y: auto;
+    padding: 10px;
+  }
+
+  .marketplace-item, .background-item {
+    background: rgba(255,255,255,0.1);
+    border: 2px solid rgba(138,43,226,0.3);
+    border-radius: 12px;
+    padding: 15px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+  }
+
+  .marketplace-item:hover, .background-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(138,43,226,0.3);
+    border-color: rgba(138,43,226,0.6);
+  }
+
+  .marketplace-item.purchased {
+    border-color: gold;
+    background: rgba(255,215,0,0.1);
+  }
+
+  .marketplace-item.equipped {
+    border-color: #00f6ff;
+    background: rgba(0,246,255,0.1);
+    box-shadow: 0 0 20px rgba(0,246,255,0.5);
+  }
+
+  .background-preview, .color-preview {
+    width: 100%;
+    height: 80px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    border: 1px solid rgba(255,255,255,0.2);
+  }
+
+  .color-preview {
+    margin-bottom: 5px;
+  }
+
+  /* Compact name color items */
+  #marketplaceNameColorsGrid .marketplace-item,
+  #nameColorsGrid .background-item {
+    padding: 10px;
+  }
+
+  #marketplaceNameColorsGrid .color-preview,
+  #nameColorsGrid .color-preview {
+    height: 50px;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: white;
+    text-shadow: 0 0 10px rgba(0,0,0,0.5);
+  }
+
+  #marketplaceNameColorsGrid .item-name,
+  #nameColorsGrid .item-name {
+    font-size: 12px;
+    margin-bottom: 3px;
+  }
+
+  #marketplaceNameColorsGrid .item-description,
+  #nameColorsGrid .item-description {
+    font-size: 10px;
+    margin-bottom: 8px;
+    opacity: 0.8;
+  }
+
+  #marketplaceNameColorsGrid .item-price,
+  #nameColorsGrid .item-price {
+    font-size: 14px;
+    margin-bottom: 8px;
+  }
+
+  #marketplaceNameColorsGrid .buy-btn,
+  #marketplaceNameColorsGrid .equip-btn,
+  #nameColorsGrid .equip-btn {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+
+  .item-price {
+    color: gold;
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 10px;
+  }
+
+  .buy-btn, .equip-btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    width: 100%;
+  }
+
+  .buy-btn {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+  }
+
+  .buy-btn:hover {
+    background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+    transform: scale(1.05);
+  }
+
+  .buy-btn:disabled {
+    background: gray;
+    cursor: not-allowed;
+    transform: scale(1);
+  }
+
+  .equip-btn {
+    background: linear-gradient(135deg, #00f6ff 0%, #00c0cc 100%);
+    color: black;
+  }
+
+  .equip-btn:hover {
+    background: linear-gradient(135deg, #00c0cc 0%, #00f6ff 100%);
+    transform: scale(1.05);
+  }
+
+  .status-badge {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: gold;
+    color: black;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: bold;
+  }
+
+  /* Hide all modals by default */
+  #marketplaceModal {
+    display: none;
+  }
+
+  /* Marketplace modal specific positioning */
+  #marketplaceModal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 3000;
+    display: none;
+  }
+
+  #marketplaceModal .modal-backdrop {
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.8);
+    backdrop-filter: blur(8px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+  }
+
+  .gem-display {
+    position: absolute;
+    top: 15px;
+    right: 50px;
+    background: rgba(0, 212, 255, 0.2);
+    border: 2px solid #00d4ff;
+    border-radius: 8px;
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .gem-icon {
+    font-size: 18px;
+  }
+
+  #userGemCount {
+    font-size: 16px;
+    font-weight: bold;
+    color: #00d4ff;
+    text-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+  }
+
+</style>
+
+<!-- Socket.IO Client -->
+<script src="/socket.io/socket.io.js"></script>
+
+<!-- LOGIN -->
+<div id="loginContainer">
+  <h1>Aura Tracker</h1>
+  <input type="text" id="usernameInput" placeholder="Username">
+  <input type="password" id="passwordInput" placeholder="Password">
+  <button id="loginBtn">Sign In</button>
+  <div id="announcementBox" style="margin-top: 20px; padding: 10px; background: rgba(255,255,255,0.2); border-radius: 8px; text-align: center; color: white; font-size: 14px; min-height: 40px; display: flex; align-items: center; justify-content: center;"></div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboard">
+  <div id="topBar">
+    <h2 id="welcomeMsg"></h2>
+    <button id="achievementsBtn" style="background: rgba(255,215,0,0.2); border: 2px solid gold; color: gold; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: all 0.3s;">🏆 Achievements</button>
+    <button id="marketplaceBtn" style="background: rgba(138,43,226,0.2); border: 2px solid purple; color: purple; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: all 0.3s;">🛒 Marketplace</button>
+  </div>
+
+  <div id="cardsContainer"></div>
+
+  <!-- SLIDE PANEL -->
+  <div id="slidePanel">
+    <h2 id="panelUserName"></h2>
+    <button id="closePanelBtn" style="position: absolute; top: 10px; right: 10px; background: rgba(255,255,255,0.2); border: none; border-radius: 50%; width: 30px; height: 30px; color: white; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.2s;">×</button>
+    <div class="tabBtns">
+      <button class="tabBtn active" data-tab="actionsTab">Actions</button>
+      <button class="tabBtn" data-tab="graphTab">Graph</button>
+    </div>
+    <div id="actionsTab" class="tabContent active">
+      <button class="actionBtn" id="giveAuraBtn">➕ Give Aura</button>
+      <button class="actionBtn" id="removeAuraBtn">➖ Remove Aura</button>
+    </div>
+    <div id="graphTab" class="tabContent">
+      <canvas id="auraChart"></canvas>
+    </div>
+  </div>
+
+  <!-- NOTIFICATION CONTAINER -->
+  <div id="notificationContainer"></div>
+
+  <!-- BOTTOM LEFT BUTTONS -->
+  <div id="bottomLeft">
+    <button id="logoutBtn">Logout</button>
+    <button id="settingsBtn" style="display:none;">Settings</button>
+    <button id="cardCustomizationBtn">Customization</button>
+  </div>
+
+  <!-- ACHIEVEMENTS MODAL -->
+  <div id="achievementsModal">
+    <div class="modal-backdrop">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>🏆 Achievements</h2>
+          <button class="close-modal">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="achievement-tabs">
+            <button class="achievement-tab-btn active" data-tab="gaining">Gaining Aura</button>
+            <button class="achievement-tab-btn" data-tab="giving">Giving Aura</button>
+          </div>
+          <div id="gainingTab" class="achievement-tab-content active">
+            <div id="gainingGrid"></div>
+          </div>
+          <div id="givingTab" class="achievement-tab-content">
+            <div id="givingGrid"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CARD CUSTOMIZATION MODAL -->
+  <div id="cardCustomizationModal">
+    <div class="modal-backdrop">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>🎨 Customization</h2>
+          <button class="close-modal">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="customization-tabs">
+            <button class="customization-tab-btn active" data-tab="nameTag">Name Tag</button>
+            <button class="customization-tab-btn" data-tab="backgrounds">Backgrounds</button>
+            <button class="customization-tab-btn" data-tab="nameColors">Name Colors</button>
+          </div>
+          <div id="nameTagTab" class="customization-tab-content active">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+              <h3 style="color: white; margin: 0;">Select a Name Tag</h3>
+              <button class="unequip-all-btn" onclick="unequipAllNameTags()" style="background: #ff4444; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 14px;">Unequip All</button>
+            </div>
+            <div id="nameTagGrid"></div>
+          </div>
+          <div id="backgroundsTab" class="customization-tab-content">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+              <h3 style="color: white; margin: 0;">Select a Background</h3>
+              <button class="unequip-all-btn" onclick="unequipAllBackgrounds()" style="background: #ff4444; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 14px;">Unequip All</button>
+            </div>
+            <div id="backgroundsGrid"></div>
+          </div>
+          <div id="nameColorsTab" class="customization-tab-content">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+              <h3 style="color: white; margin: 0;">Select a Name Color</h3>
+              <button class="unequip-all-btn" onclick="unequipAllNameColors()" style="background: #ff4444; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 14px;">Unequip All</button>
+            </div>
+            <div id="nameColorsGrid"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MARKETPLACE MODAL -->
+  <div id="marketplaceModal">
+    <div class="modal-backdrop">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>🛒 Marketplace</h2>
+          <div class="gem-display">
+            <span class="gem-icon">💎</span>
+            <span class="gem-count" id="userGemCount">0</span>
+          </div>
+          <button class="close-modal">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="marketplace-tabs">
+            <button class="marketplace-tab-btn active" data-tab="background">Backgrounds</button>
+            <button class="marketplace-tab-btn" data-tab="nameColor">Name Color</button>
+          </div>
+          <div id="backgroundTab" class="marketplace-tab-content active">
+            <h3 style="color: white; margin-bottom: 15px;">Gradient Backgrounds</h3>
+            <div id="marketplaceBackgroundsGrid"></div>
+          </div>
+          <div id="nameColorTab" class="marketplace-tab-content">
+            <h3 style="color: white; margin-bottom: 15px;">Name Colors</h3>
+            <div id="marketplaceNameColorsGrid"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+/* ======= PRELOADED USERS ======= */
+let users = [];
+let currentUser = null;
+let selectedUser = null;
+let chart = null;
+let failedAttempts = 0; // Track failed login attempts
+let auraHistory = {}; // Store aura history for each user
+let socket = null; // Socket.IO connection
+
+// Initialize Socket.IO connection
+function initializeSocket() {
+  socket = io();
+  
+  socket.on('connect', () => {
+    console.log('🔌 Connected to real-time server');
+    
+    // Authenticate with current user if logged in
+    if (currentUser) {
+      socket.emit('authenticate', currentUser.username);
+    }
+  });
+  
+  socket.on('disconnect', () => {
+    console.log('🔌 Disconnected from real-time server');
+  });
+  
+  socket.on('auraUpdate', (data) => {
+    handleRealtimeUpdate(data);
+  });
+  
+  socket.on('customizationUpdate', (data) => {
+    handleCustomizationUpdate(data);
+  });
+}
+
+// Handle real-time updates
+function handleRealtimeUpdate(data) {
+  console.log('🔄 Real-time update received:', data);
+  
+  // Show live notification
+  showLiveNotification(data.message, data.type === 'give' ? 'success' : 'warning');
+  
+  // Update user data locally
+  if (data.giver) {
+    const giverIndex = users.findIndex(u => u.username === data.giver.username);
+    if (giverIndex !== -1) {
+      users[giverIndex].aura = data.giver.aura;
+      users[giverIndex].totalGiven = data.giver.totalGiven;
+      if (data.giver.gems !== undefined) users[giverIndex].gems = data.giver.gems;
+      
+      // Update gem count in marketplace if it's open and it's the current user
+      if (data.giver.username === currentUser.username && marketplaceModal.style.display === 'block') {
+        const gemCountElement = document.getElementById('userGemCount');
+        if (gemCountElement) {
+          gemCountElement.textContent = data.giver.gems || 0;
+        }
+      }
+    }
+  }
+  
+  if (data.receiver) {
+    const receiverIndex = users.findIndex(u => u.username === data.receiver.username);
+    if (receiverIndex !== -1) {
+      users[receiverIndex].aura = data.receiver.aura;
+      users[receiverIndex].totalReceived = data.receiver.totalReceived;
+    }
+  }
+  
+  if (data.target) {
+    const targetIndex = users.findIndex(u => u.username === data.target.username);
+    if (targetIndex !== -1) {
+      users[targetIndex].aura = data.target.aura;
+      users[targetIndex].totalReceived = data.target.totalReceived;
+    }
+  }
+  
+  if (data.remover) {
+    const removerIndex = users.findIndex(u => u.username === data.remover.username);
+    if (removerIndex !== -1) {
+      users[removerIndex].aura = data.remover.aura;
+      users[removerIndex].totalGiven = data.remover.totalGiven;
+      if (data.remover.gems !== undefined) users[removerIndex].gems = data.remover.gems;
+      
+      // Update gem count in marketplace if it's open and it's the current user
+      if (data.remover.username === currentUser.username && marketplaceModal.style.display === 'block') {
+        const gemCountElement = document.getElementById('userGemCount');
+        if (gemCountElement) {
+          gemCountElement.textContent = data.remover.gems || 0;
+        }
+      }
+    }
+  }
+  
+  // Re-render cards to show updated values
+  renderCards();
+  
+  // Update slide panel if it's open for the affected user
+  if (selectedUser && 
+      ((data.receiver && data.receiver.username === selectedUser.username) ||
+       (data.target && data.target.username === selectedUser.username))) {
+    openSlidePanel();
+  }
+  
+  // Note: Achievement notifications are now handled separately via achievementUnlock event
+}
+
+// Handle customization updates
+function handleCustomizationUpdate(data) {
+  console.log('🎨 Customization update received:', data);
+  
+  // Show live notification
+  showLiveNotification(data.message, 'success');
+  
+  // Update user data locally
+  if (data.user) {
+    const userIndex = users.findIndex(u => u.username === data.user.username);
+    if (userIndex !== -1) {
+      // Update customization fields
+      if (data.user.equippedNameColor !== undefined) {
+        users[userIndex].equippedNameColor = data.user.equippedNameColor;
+      }
+      if (data.user.equippedBackground !== undefined) {
+        users[userIndex].equippedBackground = data.user.equippedBackground;
+      }
+      if (data.user.equippedNameTag !== undefined) {
+        users[userIndex].equippedNameTag = data.user.equippedNameTag;
+      }
+      if (data.user.aura !== undefined) {
+        users[userIndex].aura = data.user.aura;
+      }
+    }
+  }
+  
+  // Re-render cards to show updated customization
+  renderCards();
+  
+  // Apply dashboard background if current user updated their background
+  if (data.customizationType === 'background' && data.user && data.user.username === currentUser.username) {
+    applyDashboardBackground();
+  }
+  
+  // Refresh customization modal if open and it's the current user
+  if (cardCustomizationModal.style.display === 'block' && data.user && data.user.username === currentUser.username) {
+    renderNameTags();
+    renderBackgrounds();
+    renderNameColors();
+  }
+}
+
+// Show live notification (different from regular notifications)
+function showLiveNotification(message, type = 'info') {
+  const notification = document.createElement('div');
+  notification.className = `live-notification ${type}`;
+  notification.innerHTML = `
+    <div class="live-notification-content">
+      <span class="live-notification-icon">${type === 'success' ? '🎉' : '⚠️'}</span>
+      <span class="live-notification-message">${message}</span>
+    </div>
+  `;
+  
+  // Add to page
+  document.body.appendChild(notification);
+  
+  // Show with animation
+  setTimeout(() => {
+    notification.classList.add('show');
+  }, 100);
+  
+  // Auto-hide after 4 seconds
+  setTimeout(() => {
+    notification.classList.remove('show');
+    setTimeout(() => {
+      if (document.body.contains(notification)) {
+        document.body.removeChild(notification);
+      }
+    }, 300);
+  }, 4000);
+}
+
+// Server communication functions
+async function loadFromServer() {
+  try {
+    const res = await fetch('/api/users');
+    const data = await res.json();
+    users.length = 0;
+    users.push(...data.users);
+  } catch (error) {
+    console.error('Error loading users:', error);
+    showNotification('❌ Failed to load users from server', 'error');
+  }
+}
+
+async function saveToServer() {
+  try {
+    await fetch('/api/users', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ users })
+    });
+  } catch (error) {
+    console.error('Error saving users:', error);
+    showNotification('❌ Failed to save users to server', 'error');
+  }
+}
+
+// Announcement functions
+async function loadAnnouncement() {
+  try {
+    const res = await fetch('/api/announcement');
+    const data = await res.json();
+    return data.announcement || '';
+  } catch (error) {
+    console.error('Error loading announcement:', error);
+    return '';
+  }
+}
+
+async function updateAnnouncement(text) {
+  try {
+    const res = await fetch('/api/announcement', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ announcement: text })
+    });
+    
+    if (res.ok) {
+      showNotification('✅ Announcement updated successfully!', 'success');
+      return true;
+    } else {
+      showNotification('❌ Failed to update announcement', 'error');
+      return false;
+    }
+  } catch (error) {
+    console.error('Error updating announcement:', error);
+    showNotification('❌ Failed to update announcement', 'error');
+    return false;
+  }
+}
+
+// Initialize aura history for users
+function initializeAuraHistory() {
+  users.forEach(user => {
+    if (!auraHistory[user.username]) {
+      auraHistory[user.username] = [
+        {
+          time: new Date().toLocaleTimeString(),
+          timestamp: Date.now(),
+          aura: user.aura
+        }
+      ];
+    } else {
+      // Add current aura as latest entry if history exists but is old
+      const lastEntry = auraHistory[user.username][auraHistory[user.username].length - 1];
+      const twelveHoursAgo = Date.now() - (12 * 60 * 60 * 1000);
+      
+      if (lastEntry.timestamp < twelveHoursAgo) {
+        addAuraHistoryEntry(user.username, user.aura);
+      }
+    }
+  });
+}
+
+// Add aura change to history
+function addAuraHistoryEntry(username, newAura) {
+  if (!auraHistory[username]) {
+    auraHistory[username] = [];
+  }
+  
+  const entry = {
+    time: new Date().toLocaleTimeString(),
+    timestamp: Date.now(),
+    aura: newAura
+  };
+  
+  auraHistory[username].push(entry);
+  
+  // Keep entries from the last 24 hours only
+  const twentyFourHoursAgo = Date.now() - (24 * 60 * 60 * 1000);
+  auraHistory[username] = auraHistory[username].filter(entry => entry.timestamp > twentyFourHoursAgo);
+}
+
+function getTodayString() {
+  return new Date().toDateString();
+}
+
+function checkAndResetDailyLimits() {
+  const today = getTodayString();
+  const lastReset = localStorage.getItem('lastAuraReset');
+  
+  if (lastReset !== today) {
+    // Reset all net daily aura to 0
+    users.forEach(user => {
+      if (user.netDailyAura) {
+        Object.keys(user.netDailyAura).forEach(giver => {
+          user.netDailyAura[giver] = 0;
+        });
+      }
+    });
+    localStorage.setItem('lastAuraReset', today);
+  }
+}
+
+// Initialize daily tracking when dashboard loads
+function initializeDailyTracking() {
+  checkAndResetDailyLimits();
+  
+  users.forEach(user => {
+    if (!user.netDailyAura) {
+      user.netDailyAura = {};
+    }
+  });
+}
+
+/* ======= LOGIN LOGIC ======= */
+const loginContainer = document.getElementById("loginContainer");
+const dashboard = document.getElementById("dashboard");
+const loginBtn = document.getElementById("loginBtn");
+const usernameInput = document.getElementById("usernameInput");
+const passwordInput = document.getElementById("passwordInput");
+
+loginBtn.addEventListener("click", () => {
+  const username = usernameInput.value.trim().charAt(0).toUpperCase() + usernameInput.value.trim().slice(1);
+  const password = passwordInput.value.trim();
+  const user = users.find(u => u.username.toLowerCase() === username.toLowerCase() && u.password === password);
+  if(user){
+    currentUser = user;
+    localStorage.setItem("currentUser", username);
+    
+    // Add dramatic success animation
+    loginContainer.classList.add('success');
+    
+    // Show dashboard after animation
+    setTimeout(() => {
+      showDashboard();
+    }, 2000);
+    
+    failedAttempts = 0; // Reset failed attempts on successful login
+  } else {
+    failedAttempts++; // Increment failed attempts
+    
+    // Add shake animation
+    loginContainer.classList.add('shake');
+    
+    // Create and show appropriate message
+    const dumbMessage = document.createElement('div');
+    dumbMessage.className = 'dumb-message';
+    
+    if (failedAttempts === 1) {
+      dumbMessage.textContent = "YOU'RE THAT DUMB 🤪";
+    } else if (failedAttempts === 2) {
+      dumbMessage.textContent = "THERES NO WAYY 🤪";
+    } else if (failedAttempts >= 3) {
+      dumbMessage.textContent = "Bro. just stop 🤪";
+    }
+    
+    document.body.appendChild(dumbMessage);
+    
+    // Show message
+    setTimeout(() => {
+      dumbMessage.classList.add('show');
+    }, 100);
+    
+    // Hide login form
+    setTimeout(() => {
+      loginContainer.style.opacity = '0';
+      loginContainer.style.transform = 'scale(0.8)';
+    }, 200);
+    
+    // Remove shake and show login form again
+    setTimeout(() => {
+      loginContainer.classList.remove('shake');
+      loginContainer.style.opacity = '1';
+      loginContainer.style.transform = 'scale(1)';
+      dumbMessage.classList.remove('show');
+    }, 1500);
+    
+    // Remove message completely
+    setTimeout(() => {
+      document.body.removeChild(dumbMessage);
+    }, 2000);
+    
+    // Clear inputs
+    usernameInput.value = '';
+    passwordInput.value = '';
+  }
+});
+
+/* Persistent login */
+window.addEventListener("load", async () => {
+  // Load users from server first
+  await loadFromServer();
+  
+  // Load and display announcement
+  const announcement = await loadAnnouncement();
+  const announcementBox = document.getElementById('announcementBox');
+  if (announcementBox) {
+    announcementBox.textContent = announcement;
+  }
+  
+  const savedUser = localStorage.getItem("currentUser");
+  if(savedUser){
+    const user = users.find(u=>u.username.toLowerCase()===savedUser.toLowerCase());
+    if(user){ 
+      currentUser=user; 
+      showDashboard(); 
+    }
+  }
+});
+
+/* ======= DASHBOARD LOGIC ======= */
+function applyDashboardBackground() {
+  if (!currentUser || !currentUser.equippedBackground) {
+    // Reset to default background if no background equipped
+    document.body.style.background = 'linear-gradient(135deg, #87CEEB, #9B59B6, #4A90E2)';
+    document.body.style.backgroundSize = '400% 400%';
+    return;
+  }
+  
+  // Apply equipped background
+  const background = marketplaceBackgrounds.find(b => b.id === currentUser.equippedBackground);
+  if (background) {
+    document.body.style.background = background.gradient;
+    document.body.style.backgroundSize = 'cover';
+    document.body.style.backgroundAttachment = 'fixed';
+  }
+}
+
+function showDashboard(){
+  loginContainer.style.display="none";
+  dashboard.style.display="flex";
+  document.getElementById("welcomeMsg").innerText=`Welcome, ${currentUser.username}`;
+  document.getElementById("settingsBtn").style.display = currentUser.role==="admin"?"inline-block":"none";
+  
+  // Apply user's equipped background to dashboard
+  applyDashboardBackground();
+  
+  // Initialize socket connection if not already connected
+  if (!socket) {
+    initializeSocket();
+  } else if (currentUser) {
+    // Re-authenticate if socket exists but user changed
+    socket.emit('authenticate', currentUser.username);
+  }
+  
+  initializeDailyTracking(); // Initialize daily tracking
+  initializeAuraHistory(); // Initialize aura history
+  renderCards();
+  
+  // Trigger fade-in effect
+  setTimeout(() => {
+    dashboard.style.opacity = 1;
+  }, 50);
+}
+
+const cardsContainer = document.getElementById("cardsContainer");
+function renderCards(){
+  cardsContainer.innerHTML="";
+  users.forEach(user=>{
+    const card = document.createElement("div");
+    card.className="userCard";
+    
+    // Get equipped name tag if any
+    let nameTagDisplay = '';
+    if (user.equippedNameTag) {
+      const allAchievements = [...gainingAchievements, ...givingAchievements];
+      const equippedAchievement = allAchievements.find(a => a.id === user.equippedNameTag);
+      if (equippedAchievement) {
+        nameTagDisplay = `<div class="user-name-tag">${equippedAchievement.name}</div>`;
+      }
+    }
+    
+    // Get equipped name color if any
+    let nameColorStyle = '';
+    if (user.equippedNameColor) {
+      const nameColor = marketplaceNameColors.find(c => c.id === user.equippedNameColor);
+      if (nameColor) {
+        nameColorStyle = `color: ${nameColor.color};`;
+      }
+    }
+    
+    card.innerHTML = `
+      <div class="user-name" style="${nameColorStyle}">${user.username}</div>
+      <div class="user-aura"><span class="aura-label">Aura: </span><span class="aura-count">${user.aura}</span></div>
+      ${nameTagDisplay}
+    `;
+    
+    card.addEventListener("click", ()=>{
+      selectedUser = user;
+      openSlidePanel();
+    });
+    cardsContainer.appendChild(card);
+  });
+}
+
+/* ======= SLIDE PANEL LOGIC ======= */
+const slidePanel = document.getElementById("slidePanel");
+const panelUserName = document.getElementById("panelUserName");
+const tabBtns = document.querySelectorAll(".tabBtn");
+const tabContents = document.querySelectorAll(".tabContent");
+const giveAuraBtn = document.getElementById("giveAuraBtn");
+const removeAuraBtn = document.getElementById("removeAuraBtn");
+const closePanelBtn = document.getElementById("closePanelBtn");
+
+function openSlidePanel(){
+  const netAmount = selectedUser.netDailyAura && selectedUser.netDailyAura[currentUser.username] ? selectedUser.netDailyAura[currentUser.username] : 0;
+  const netStatus = netAmount > 0 ? `+${netAmount}` : netAmount.toString();
+  const statusColor = netAmount > 0 ? '#4CAF50' : netAmount < 0 ? '#f44336' : '#666';
+  
+  panelUserName.innerHTML = `
+    ${selectedUser.username} - ${selectedUser.aura} Aura
+  `;
+  slidePanel.classList.add("open");
+  updateChart();
+  // Disable actions if self
+  if(selectedUser.username === currentUser.username){
+    giveAuraBtn.disabled = true;
+    removeAuraBtn.disabled = true;
+  } else {
+    giveAuraBtn.disabled = false;
+    removeAuraBtn.disabled = false;
+  }
+}
+
+/* Tabs */
+tabBtns.forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    tabBtns.forEach(b=>b.classList.remove("active"));
+    tabContents.forEach(c=>c.classList.remove("active"));
+    btn.classList.add("active");
+    document.getElementById(btn.dataset.tab).classList.add("active");
+  });
+});
+
+/* ======= ACTIONS ======= */
+async function giveAura(amount=25){
+  try {
+    const res = await fetch('/api/give-aura', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        giverUsername: currentUser.username, 
+        receiverUsername: selectedUser.username, 
+        amount 
+      })
+    });
+    
+    const data = await res.json();
+    
+    if (data.success) {
+      // Reload data and update UI
+      await loadFromServer();
+      
+      // Find updated user data after server reload
+      const giver = users.find(u => u.username === currentUser.username);
+      const receiver = users.find(u => u.username === selectedUser.username);
+      
+      // Add aura history entries for both users
+      if (giver) addAuraHistoryEntry(giver.username, giver.aura);
+      if (receiver) addAuraHistoryEntry(receiver.username, receiver.aura);
+      
+      // Update selectedUser reference with fresh data
+      selectedUser = receiver;
+      
+      openSlidePanel();
+      renderCards();
+      updateChart();
+    } else {
+      showNotification(data.error || 'Failed to give aura', 'error');
+    }
+  } catch (error) {
+    console.error('Error giving aura:', error);
+    showNotification('❌ Failed to give aura', 'error');
+  }
+}
+
+async function removeAura(amount=25){
+  try {
+    const res = await fetch('/api/remove-aura', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        removerUsername: currentUser.username, 
+        targetUsername: selectedUser.username, 
+        amount 
+      })
+    });
+    
+    const data = await res.json();
+    
+    if (data.success) {
+      // Reload data and update UI
+      await loadFromServer();
+      
+      // Find updated user data after server reload
+      const remover = users.find(u => u.username === currentUser.username);
+      const target = users.find(u => u.username === selectedUser.username);
+      
+      // Add aura history entries for both users
+      if (remover) addAuraHistoryEntry(remover.username, remover.aura);
+      if (target) addAuraHistoryEntry(target.username, target.aura);
+      
+      // Update selectedUser reference with fresh data
+      selectedUser = target;
+      
+      openSlidePanel();
+      renderCards();
+      updateChart();
+    } else {
+      showNotification(data.error || 'Failed to remove aura', 'error');
+    }
+  } catch (error) {
+    console.error('Error removing aura:', error);
+    showNotification('❌ Failed to remove aura', 'error');
+  }
+}
+
+giveAuraBtn.addEventListener("click", async ()=>await giveAura());
+removeAuraBtn.addEventListener("click", async ()=>await removeAura());
+closePanelBtn.addEventListener("click", ()=>{
+  slidePanel.classList.remove("open");
+});
+
+/* ======= LOGOUT ======= */
+document.getElementById("logoutBtn").addEventListener("click", ()=>{
+  localStorage.removeItem("currentUser");
+  location.reload();
+});
+
+/* ======= SETTINGS MODAL ======= */
+const settingsModal = document.createElement('div');
+settingsModal.id = 'settingsModal';
+settingsModal.innerHTML = `
+  <div class="modal-backdrop">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>⚙️ Admin Settings</h2>
+        <button class="close-modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="admin-settings-tabs">
+          <button class="admin-tab-btn active" data-tab="announcements">📢 Announcements</button>
+          <button class="admin-tab-btn" data-tab="users">👥 Users</button>
+          <button class="admin-tab-btn" data-tab="system">⚙️ System</button>
+        </div>
+        
+        <div id="announcementsTab" class="admin-tab-content active">
+          <div class="settings-section">
+            <h3>📢 Announcement Management</h3>
+            <textarea id="announcementInput" placeholder="Enter announcement text..." style="width: 100%; height: 100px; padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.3); background: rgba(255,255,255,0.1); color: white; font-size: 14px; resize: vertical; margin-bottom: 15px; box-sizing: border-box;"></textarea>
+            <button class="update-announcement-btn">💾 Update Announcement</button>
+          </div>
+        </div>
+        
+        <div id="usersTab" class="admin-tab-content">
+          <div class="settings-section">
+            <h3>👥 User Management</h3>
+            <div id="usersList" style="max-height: 300px; overflow-y: auto; margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; padding: 12px; background: rgba(255,255,255,0.05); box-sizing: border-box;"></div>
+            <button class="add-user-btn">+ Add New User</button>
+          </div>
+        </div>
+        
+        <div id="systemTab" class="admin-tab-content">
+          <div class="settings-section">
+            <h3>⚙️ System Controls</h3>
+            <button class="reset-daily-btn">🔄 Reset Daily Limits</button>
+            <button class="reset-achievements-btn" id="resetAllAchievementsBtn">🏆 Reset All Users</button>
+            <button class="reset-customization-btn" id="resetAllCustomizationBtn">🎨 Reset All Customization</button>
+            <button class="updates-btn" id="updatesBtn">🔄 Updates</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+`;
+document.body.appendChild(settingsModal);
+
+// Updates Modal
+const updatesModal = document.createElement('div');
+updatesModal.id = 'updatesModal';
+updatesModal.innerHTML = `
+  <div class="modal-backdrop">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>🔄 Updates</h2>
+        <button class="close-modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="updates-section">
+          <h3>📤 Export Data</h3>
+          <p style="color: rgba(255,255,255,0.8); margin-bottom: 15px;">
+            Export all user data, achievements, and settings to a file for backup or migration.
+          </p>
+          <button class="export-btn" id="exportBtn">📤 Export All Data</button>
+          <div id="exportStatus" style="margin-top: 10px; color: #00d4ff;"></div>
+        </div>
+        
+        <div class="updates-section">
+          <h3>📥 Import Data</h3>
+          <p style="color: rgba(255,255,255,0.8); margin-bottom: 15px;">
+            Import user data from a backup file. This will overwrite all existing data.
+          </p>
+          <input type="file" id="importFile" accept=".json" style="display: none;">
+          <button class="import-btn" id="importBtn">📥 Import Data File</button>
+          <div id="importStatus" style="margin-top: 10px; color: #ff6b6b;"></div>
+          <div id="importPreview" style="margin-top: 15px; display: none;">
+            <h4 style="color: white; margin-bottom: 10px;">Import Preview:</h4>
+            <div id="previewContent" style="background: rgba(255,255,255,0.1); padding: 10px; border-radius: 8px; color: white;"></div>
+            <button class="confirm-import-btn" id="confirmImportBtn" style="margin-top: 10px; background: #4CAF50;">✅ Confirm Import</button>
+            <button class="cancel-import-btn" id="cancelImportBtn" style="margin-top: 10px; background: #f44336;">❌ Cancel</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+`;
+document.body.appendChild(updatesModal);
+
+// Settings modal styles
+const modalStyles = document.createElement('style');
+modalStyles.textContent = `
+  #addModal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 2000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  #addModal .modal-backdrop {
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(5px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  #addModal .modal-content {
+    background: rgba(255,255,255,0.15);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255,255,255,0.3);
+    border-radius: 15px;
+    padding: 0;
+    max-width: 400px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  }
+
+  #editModal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 2000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  #editModal .modal-backdrop {
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(5px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  #editModal .modal-content {
+    background: rgba(255,255,255,0.15);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255,255,255,0.3);
+    border-radius: 15px;
+    padding: 0;
+    max-width: 400px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  }
+
+  #settingsModal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1000;
+    display: none;
+  }
+  
+  #updatesModal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1000;
+    display: none;
+  }
+  
+  #achievementsModal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1000;
+    display: none;
+  }
+  
+  #cardCustomizationModal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1000;
+    display: none;
+  }
+  
+  .modal-backdrop {
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(5px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .modal-content {
+    background: rgba(255,255,255,0.15);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255,255,255,0.3);
+    border-radius: 15px;
+    padding: 0;
+    max-width: 600px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  }
+  
+  /* Admin Settings Tabs */
+  .admin-settings-tabs {
+    display: flex;
+    gap: 5px;
+    margin-bottom: 20px;
+    border-bottom: 2px solid rgba(255,255,255,0.1);
+    padding-bottom: 0;
+  }
+  
+  .admin-tab-btn {
+    flex: 1;
+    padding: 12px 16px;
+    border: none;
+    border-radius: 8px 8px 0 0;
+    background: rgba(255,255,255,0.1);
+    color: rgba(255,255,255,0.7);
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    border-bottom: 2px solid transparent;
+    touch-action: manipulation;
+  }
+  
+  .admin-tab-btn:hover {
+    background: rgba(255,255,255,0.2);
+    color: white;
+  }
+  
+  .admin-tab-btn.active {
+    background: rgba(0,246,255,0.2);
+    color: #00f6ff;
+    border-bottom-color: #00f6ff;
+  }
+  
+  .admin-tab-content {
+    display: none;
+  }
+  
+  .admin-tab-content.active {
+    display: block;
+  }
+  
+  .settings-section {
+    margin-bottom: 20px;
+  }
+  
+  .settings-section h3 {
+    color: white;
+    margin-bottom: 15px;
+    font-size: 18px;
+  }
+  
+  .settings-section button {
+    width: 100%;
+    padding: 12px 15px;
+    margin: 8px 0;
+    border: none;
+    border-radius: 8px;
+    background: rgba(0,246,255,0.2);
+    color: white;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background 0.2s;
+    touch-action: manipulation;
+    min-height: 44px;
+    text-align: left;
+    box-sizing: border-box;
+  }
+  
+  .settings-section button:hover {
+    background: rgba(0,246,255,0.3);
+  }
+  
+  /* Mobile modal styles */
+  @media (max-width: 768px) {
+    .modal-content {
+      width: 85%;
+      max-height: 75vh;
+      margin: 10px auto;
+    }
+    
+    .modal-header {
+      padding: 6px;
+    }
+    
+    .modal-header h2 {
+      font-size: 14px;
+    }
+    
+    .modal-body {
+      padding: 6px;
+    }
+    
+    #gainingGrid, #givingGrid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 4px;
+      padding: 3px;
+    }
+    
+    .achievement-card {
+      min-height: 55px;
+      padding: 4px;
+    }
+    
+    .achievement-name {
+      font-size: 8px;
+    }
+    
+    .achievement-description {
+      font-size: 6px;
+    }
+    
+    .achievement-status {
+      font-size: 14px;
+      margin-bottom: 2px;
+    }
+    
+    .achievement-tabs {
+      margin-bottom: 6px;
+      padding-bottom: 3px;
+    }
+    
+    .achievement-tab-btn {
+      padding: 6px 10px;
+      font-size: 10px;
+    }
+    
+    .close-modal {
+      font-size: 18px;
+      padding: 3px;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .modal-content {
+      width: 98%;
+      max-height: 95vh;
+      margin: 10px auto;
+    }
+    
+    #gainingGrid, #givingGrid {
+      grid-template-columns: 1fr;
+    }
+    
+    .achievement-tabs {
+      flex-direction: column;
+      gap: 5px;
+    }
+    
+    .achievement-tab-btn {
+      padding: 8px 15px;
+      font-size: 14px;
+    }
+  }
+  
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.2);
+  }
+  
+  .modal-header h2 {
+    color: white;
+    margin: 0;
+    font-size: 24px;
+  }
+  
+  .close-modal {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 5px;
+    transition: background 0.3s;
+  }
+  
+  .close-modal:hover {
+    background: rgba(255,255,255,0.1);
+  }
+  
+  .modal-body {
+    padding: 20px;
+  }
+  
+  #achievementsGrid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    padding: 8px;
+  }
+  
+  #gainingGrid, #givingGrid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    padding: 8px;
+  }
+  
+  .achievement-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 15px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.2);
+    padding-bottom: 10px;
+  }
+  
+  .achievement-tab-btn {
+    flex: 1;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px 8px 0 0;
+    background: rgba(255,255,255,0.1);
+    color: white;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s;
+  }
+  
+  .achievement-tab-btn.active {
+    background: rgba(255,215,0,0.3);
+    border-bottom: 2px solid gold;
+  }
+  
+  .achievement-tab-btn:hover {
+    background: rgba(255,255,255,0.2);
+  }
+  
+  .achievement-tab-content {
+    display: none;
+  }
+  
+  .achievement-tab-content.active {
+    display: block;
+  }
+  
+  .achievement-card {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 12px;
+    padding: 8px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    min-height: 80px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  
+  .achievement-card.unlocked {
+    background: linear-gradient(135deg, rgba(255,215,0,0.2), rgba(255,165,0,0.2));
+    border-color: gold;
+    box-shadow: 0 4px 20px rgba(255,215,0,0.3);
+  }
+  
+  .achievement-card.locked {
+    opacity: 0.6;
+    filter: grayscale(0.5);
+  }
+  
+  .achievement-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+  }
+  
+  .achievement-status {
+    font-size: 18px;
+    margin-bottom: 4px;
+  }
+  
+  .achievement-name {
+    font-weight: bold;
+    margin-bottom: 3px;
+    font-size: 11px;
+  }
+  
+  .achievement-description {
+    font-size: 9px;
+    color: rgba(255,255,255,0.8);
+    line-height: 1.2;
+  }
+  
+  .danger-zone {
+    border: 2px solid rgba(255,0,0,0.3);
+    background: rgba(255,0,0,0.1);
+    border-radius: 8px;
+    padding: 15px;
+  }
+  
+  .danger-zone h3 {
+    color: #ff4444;
+    margin-bottom: 15px;
+  }
+  
+  .danger-zone-btn {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #ff4444;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    background: rgba(255,68,68,0.2);
+    color: #ff4444;
+    transition: all 0.3s;
+  }
+  
+  .danger-zone-btn:hover {
+    background: rgba(255,68,68,0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(255,68,68,0.3);
+  }
+  
+  #dangerZoneModal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 2000;
+    display: none;
+  }
+  
+  .danger-action-btn {
+    width: 100%;
+    padding: 15px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    margin-bottom: 10px;
+    transition: all 0.3s;
+  }
+  
+  .reset-achievements-btn {
+    background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+    color: white;
+  }
+  
+  .reset-aura-btn {
+    background: linear-gradient(135deg, #ff4757, #c44569);
+    color: white;
+  }
+  
+  .danger-action-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(255,71,87,0.4);
+  }
+  
+  .settings-section {
+    margin-bottom: 30px;
+  }
+  
+  .settings-section h3 {
+    color: white;
+    margin-bottom: 15px;
+    font-size: 18px;
+  }
+  
+  .user-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(255,255,255,0.1);
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+  }
+  
+  .user-info {
+    color: white;
+  }
+  
+  .user-actions {
+    display: flex;
+    gap: 10px;
+  }
+  
+  .btn-small {
+    padding: 5px 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: all 0.3s;
+  }
+  
+  .edit-btn {
+    background: #4CAF50;
+    color: white;
+  }
+  
+  .delete-btn {
+    background: #f44336;
+    color: white;
+  }
+  
+  .gem-btn {
+    background: #00d4ff;
+    color: white;
+    font-weight: bold;
+  }
+  
+  .gem-btn.remove {
+    background: #ff6b6b;
+  }
+  
+  .gem-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 3px 10px rgba(0,0,0,0.3);
+  }
+  
+  .add-user-btn, .reset-daily-btn, .backup-btn {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    margin-bottom: 10px;
+    transition: all 0.3s;
+  }
+  
+  .add-user-btn {
+    background: #2196F3;
+    color: white;
+  }
+  
+  .reset-daily-btn {
+    background: #FF9800;
+    color: white;
+  }
+  
+  .add-user-btn:hover, .reset-daily-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+  }
+  
+  .updates-section {
+    margin-bottom: 30px;
+    padding: 20px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+  
+  .updates-section h3 {
+    color: white;
+    margin-bottom: 15px;
+    font-size: 18px;
+  }
+  
+  .export-btn, .import-btn, .updates-btn {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    margin-bottom: 10px;
+    transition: all 0.3s;
+  }
+  
+  .export-btn {
+    background: linear-gradient(135deg, #00d4ff, #0099cc);
+    color: white;
+  }
+  
+  .import-btn {
+    background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+    color: white;
+  }
+  
+  .updates-btn {
+    background: linear-gradient(135deg, #9c27b0, #7b1fa2);
+    color: white;
+  }
+  
+  .export-btn:hover, .import-btn:hover, .updates-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+  }
+  
+  .confirm-import-btn, .cancel-import-btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    margin-right: 10px;
+    transition: all 0.3s;
+  }
+  
+  .confirm-import-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 3px 10px rgba(76, 175, 80, 0.3);
+  }
+  
+  .cancel-import-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 3px 10px rgba(244, 67, 54, 0.3);
+  }
+  
+  .form-group {
+    margin-bottom: 15px;
+  }
+  
+  .form-group label {
+    display: block;
+    color: white;
+    margin-bottom: 5px;
+    font-weight: bold;
+  }
+  
+  .form-group input, .form-group select {
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-radius: 8px;
+    background: rgba(255,255,255,0.1);
+    color: white;
+    font-size: 14px;
+    outline: none;
+    transition: all 0.3s;
+  }
+  
+  .form-group input:focus, .form-group select:focus {
+    background: rgba(255,255,255,0.2);
+    box-shadow: 0 0 10px rgba(0,246,255,0.3);
+  }
+  
+  .form-group input[readonly] {
+    background: rgba(255,255,255,0.05);
+    cursor: not-allowed;
+  }
+  
+  .form-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+  }
+  
+  .save-btn {
+    background: #4CAF50;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s;
+    flex: 1;
+  }
+  
+  .cancel-btn {
+    background: #f44336;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s;
+    flex: 1;
+  }
+  
+  .save-btn:hover, .cancel-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+  }
+  
+  /* --- NOTIFICATION SYSTEM --- */
+  #notificationContainer {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 3000;
+    pointer-events: none;
+  }
+  
+  .notification {
+    background: rgba(255,255,255,0.95);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255,255,255,0.3);
+    border-radius: 12px;
+    padding: 15px 20px;
+    margin-bottom: 10px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    animation: slideInRight 0.3s ease-out;
+    transition: all 0.3s ease;
+    max-width: 300px;
+  }
+  
+  .notification.show {
+    animation: slideInRight 0.3s ease-in;
+    pointer-events: auto;
+  }
+  
+  .notification.warning {
+    border-left: 4px solid #FF9800;
+    background: rgba(255, 152, 0, 0.9);
+  }
+  
+  .notification.success {
+    border-left: 4px solid #4CAF50;
+    background: rgba(76, 175, 80, 0.9);
+  }
+  
+  .notification.error {
+    border-left: 4px solid #f44336;
+    background: rgba(244, 67, 54, 0.9);
+  }
+  
+  @keyframes slideInRight {
+    from {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+  
+  @keyframes slideOutRight {
+    from {
+      transform: translateX(0);
+      opacity: 1;
+    }
+    to {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+  }
+`;
+document.head.appendChild(modalStyles);
+
+// Danger Zone Modal
+const dangerZoneModal = document.createElement('div');
+dangerZoneModal.id = 'dangerZoneModal';
+dangerZoneModal.innerHTML = `
+  <div class="modal-backdrop">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>🚨 Danger Zone</h2>
+        <button class="close-modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div style="color: #ff4444; margin-bottom: 20px; text-align: center;">
+          <p style="font-size: 18px; font-weight: bold; margin-bottom: 10px;">⚠️ WARNING ⚠️</p>
+          <p>These actions are irreversible and will permanently affect all users!</p>
+        </div>
+        <button class="danger-action-btn reset-achievements-btn" id="resetAchievementsBtn">
+          🏆 Reset All Achievements
+        </button>
+        <button class="danger-action-btn reset-aura-btn" id="resetAllAuraBtn">
+          💀 Set Everyone to 100 Aura
+        </button>
+      </div>
+    </div>
+  </div>
+`;
+document.body.appendChild(dangerZoneModal);
+
+// Settings modal functionality
+async function openSettings() {
+  if (currentUser.role !== "admin") return;
+  
+  // Load current announcement
+  const currentAnnouncement = await loadAnnouncement();
+  const announcementInput = document.getElementById('announcementInput');
+  if (announcementInput) {
+    announcementInput.value = currentAnnouncement;
+  }
+  
+  settingsModal.style.display = 'block';
+  renderUsersList();
+  
+  // Add event listener for announcement update button
+  const updateBtn = settingsModal.querySelector('.update-announcement-btn');
+  if (updateBtn) {
+    // Remove existing listener to prevent duplicates
+    updateBtn.replaceWith(updateBtn.cloneNode(true));
+    const newUpdateBtn = settingsModal.querySelector('.update-announcement-btn');
+    newUpdateBtn.addEventListener('click', async () => {
+      const announcementInput = document.getElementById('announcementInput');
+      const newAnnouncement = announcementInput.value.trim();
+      
+      if (await updateAnnouncement(newAnnouncement)) {
+        // Update the announcement box on login page if visible
+        const announcementBox = document.getElementById('announcementBox');
+        if (announcementBox) {
+          announcementBox.textContent = newAnnouncement;
+        }
+      }
+    });
+  }
+}
+
+function closeSettings() {
+  settingsModal.style.display = 'none';
+}
+
+// Updates modal functionality
+function openUpdates() {
+  updatesModal.style.display = 'block';
+}
+
+function closeUpdates() {
+  updatesModal.style.display = 'none';
+}
+
+// Export functionality
+async function exportData() {
+  try {
+    const exportStatus = document.getElementById('exportStatus');
+    exportStatus.textContent = '🔄 Preparing export...';
+    
+    // Get current announcement
+    const announcement = await loadAnnouncement();
+    
+    // Create export data structure
+    const exportData = {
+      exportInfo: {
+        timestamp: new Date().toISOString(),
+        serverVersion: '1.0',
+        totalUsers: users.length
+      },
+      users: users.map(user => ({
+        username: user.username,
+        password: user.password,
+        aura: user.aura || 0,
+        gems: user.gems || 0,
+        role: user.role || 'user',
+        achievements: user.achievements || [],
+        totalGiven: user.totalGiven || 0,
+        totalReceived: user.totalReceived || 0,
+        purchasedBackgrounds: user.purchasedBackgrounds || [],
+        purchasedNameColors: user.purchasedNameColors || [],
+        purchasedNameTags: user.purchasedNameTags || [],
+        equippedBackground: user.equippedBackground || null,
+        equippedNameColor: user.equippedNameColor || null,
+        equippedNameTag: user.equippedNameTag || null,
+        netDailyAura: user.netDailyAura || {}
+      })),
+      settings: {
+        announcement: announcement,
+        lastReset: localStorage.getItem('lastAuraReset') || ''
+      }
+    };
+    
+    // Create and download file
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `aura-tracker-export-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    exportStatus.textContent = `✅ Export complete! ${users.length} users exported.`;
+    showNotification(`📤 Successfully exported ${users.length} users`, 'success');
+    
+  } catch (error) {
+    console.error('Export error:', error);
+    const exportStatus = document.getElementById('exportStatus');
+    exportStatus.textContent = '❌ Export failed!';
+    showNotification('❌ Failed to export data', 'error');
+  }
+}
+
+// Import functionality
+let pendingImportData = null;
+
+async function importData() {
+  const importFile = document.getElementById('importFile');
+  const importStatus = document.getElementById('importStatus');
+  
+  // Trigger file picker if no file selected
+  if (!importFile.files.length) {
+    importFile.click();
+    return;
+  }
+  
+  try {
+    importStatus.textContent = '🔄 Reading file...';
+    
+    const file = importFile.files[0];
+    const text = await file.text();
+    const data = JSON.parse(text);
+    
+    // Validate data structure
+    if (!data.users || !Array.isArray(data.users)) {
+      throw new Error('Invalid file format');
+    }
+    
+    pendingImportData = data;
+    
+    // Show preview
+    const previewContent = document.getElementById('previewContent');
+    const importPreview = document.getElementById('importPreview');
+    
+    previewContent.innerHTML = `
+      <p><strong>Export Date:</strong> ${new Date(data.exportInfo?.timestamp || 'Unknown').toLocaleString()}</p>
+      <p><strong>Version:</strong> ${data.exportInfo?.serverVersion || 'Unknown'}</p>
+      <p><strong>Users to Import:</strong> ${data.users.length}</p>
+      <p><strong>Users will be overwritten:</strong> ${users.length}</p>
+      <div style="margin-top: 10px; padding: 10px; background: rgba(255,0,0,0.1); border-radius: 5px;">
+        <p style="color: #ff6b6b;">⚠️ This will completely replace all current data!</p>
+      </div>
+    `;
+    
+    importPreview.style.display = 'block';
+    importStatus.textContent = '✅ File ready for import';
+    
+  } catch (error) {
+    console.error('Import error:', error);
+    importStatus.textContent = `❌ Error: ${error.message}`;
+    showNotification('❌ Failed to read import file', 'error');
+  }
+}
+
+async function confirmImport() {
+  if (!pendingImportData) return;
+  
+  try {
+    if (!confirm('⚠️ FINAL WARNING: This will overwrite all existing data and cannot be undone. Continue?')) {
+      return;
+    }
+    
+    const importStatus = document.getElementById('importStatus');
+    importStatus.textContent = '🔄 Importing data...';
+    
+    // Apply imported data
+    users.length = 0;
+    users.push(...pendingImportData.users);
+    
+    // Update announcement if present
+    if (pendingImportData.settings?.announcement) {
+      await updateAnnouncement(pendingImportData.settings.announcement);
+    }
+    
+    // Update last reset if present
+    if (pendingImportData.settings?.lastReset) {
+      localStorage.setItem('lastAuraReset', pendingImportData.settings.lastReset);
+    }
+    
+    // Save to server
+    await saveToServer();
+    
+    // Update UI
+    await loadFromServer();
+    renderCards();
+    renderUsersList();
+    
+    // Close modal
+    closeUpdates();
+    
+    // Show success
+    showNotification(`📥 Successfully imported ${pendingImportData.users.length} users!`, 'success');
+    
+    // Clear pending data
+    pendingImportData = null;
+    
+  } catch (error) {
+    console.error('Import confirmation error:', error);
+    const importStatus = document.getElementById('importStatus');
+    importStatus.textContent = '❌ Import failed!';
+    showNotification('❌ Failed to import data', 'error');
+  }
+}
+
+function cancelImport() {
+  pendingImportData = null;
+  document.getElementById('importPreview').style.display = 'none';
+  document.getElementById('importStatus').textContent = '';
+  document.getElementById('importFile').value = '';
+}
+
+function renderUsersList() {
+  const usersList = document.getElementById('usersList');
+  usersList.innerHTML = '';
+  
+  users.forEach(user => {
+    const userItem = document.createElement('div');
+    userItem.className = 'user-item';
+    userItem.innerHTML = `
+      <div class="user-info">
+        <strong>${user.username}</strong> - ${user.aura} Aura - 💎 ${user.gems || 0} Gems - ${user.role}
+      </div>
+      <div class="user-actions">
+        <button class="btn-small gem-btn" onclick="addGems('${user.username}', 1)">+1💎</button>
+        <button class="btn-small gem-btn" onclick="addGems('${user.username}', 5)">+5💎</button>
+        <button class="btn-small gem-btn" onclick="addGems('${user.username}', 10)">+10💎</button>
+        <button class="btn-small gem-btn remove" onclick="addGems('${user.username}', -1)">-1💎</button>
+        <button class="btn-small gem-btn remove" onclick="addGems('${user.username}', -5)">-5💎</button>
+        <button class="btn-small edit-btn" onclick="editUser('${user.username}')">Edit</button>
+        ${user.username !== 'Max' ? `<button class="btn-small delete-btn" onclick="deleteUser('${user.username}')">Delete</button>` : ''}
+      </div>
+    `;
+    usersList.appendChild(userItem);
+  });
+}
+
+function editUser(username) {
+  const user = users.find(u => u.username === username);
+  
+  // Create edit modal
+  const editModal = document.createElement('div');
+  editModal.id = 'editModal';
+  editModal.style.zIndex = '2000'; // Ensure it's on top
+  editModal.innerHTML = `
+    <div class="modal-backdrop">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>✏️ Edit User</h2>
+          <button class="close-modal">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label>Username:</label>
+            <input type="text" id="editUsername" value="${user.username}" readonly>
+          </div>
+          <div class="form-group">
+            <label>Password:</label>
+            <input type="password" id="editPassword" placeholder="Enter new password (leave blank to keep current)">
+          </div>
+          <div class="form-group">
+            <label>Current Aura:</label>
+            <input type="number" id="editAura" value="${user.aura}" min="0" max="9999">
+          </div>
+          <div class="form-group">
+            <label>Role:</label>
+            <select id="editRole">
+              <option value="user" ${user.role === 'user' ? 'selected' : ''}>User</option>
+              <option value="admin" ${user.role === 'admin' ? 'selected' : ''}>Admin</option>
+            </select>
+          </div>
+          <div class="form-actions">
+            <button class="save-btn">💾 Save Changes</button>
+            <button class="cancel-btn">❌ Cancel</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(editModal);
+  
+  // Add event listeners for edit modal
+  const saveBtn = editModal.querySelector('.save-btn');
+  const cancelBtn = editModal.querySelector('.cancel-btn');
+  const closeBtn = editModal.querySelector('.close-modal');
+  const backdrop = editModal.querySelector('.modal-backdrop');
+  
+  function closeEditModal() {
+    document.body.removeChild(editModal);
+  }
+  
+  saveBtn.addEventListener('click', async () => {
+    const newAura = parseInt(document.getElementById('editAura').value);
+    const newRole = document.getElementById('editRole').value;
+    const newPassword = document.getElementById('editPassword').value.trim();
+    
+    if (!isNaN(newAura) && newAura >= 0) {
+      user.aura = newAura;
+      user.role = newRole;
+      
+      // Update password only if a new one is provided
+      if (newPassword) {
+        user.password = newPassword;
+        showNotification(`Password updated for ${user.username}`, 'success');
+      }
+      
+      renderUsersList();
+      renderCards();
+      await saveToServer();
+      closeEditModal();
+    } else {
+      showNotification('Please enter a valid aura amount', 'error');
+    }
+  });
+  
+  cancelBtn.addEventListener('click', closeEditModal);
+  closeBtn.addEventListener('click', closeEditModal);
+  backdrop.addEventListener('click', closeEditModal);
+  editModal.querySelector('.modal-content').addEventListener('click', (e) => e.stopPropagation());
+}
+
+// Notification system
+function showNotification(message, type = 'info') {
+  const notificationContainer = document.getElementById('notificationContainer');
+  
+  // Create notification element
+  const notification = document.createElement('div');
+  notification.className = `notification ${type}`;
+  notification.innerHTML = `
+    <div class="notification-content">
+      <span class="notification-icon">${type === 'warning' ? '⚠️' : type === 'error' ? '❌' : '✅'}</span>
+      <span class="notification-message">${message}</span>
+    </div>
+  `;
+  
+  // Add to container
+  notificationContainer.appendChild(notification);
+  
+  // Show notification
+  notification.classList.add('show');
+  
+  // Auto-hide after 5 seconds
+  setTimeout(() => {
+    notification.classList.remove('show');
+    setTimeout(() => {
+      if (notificationContainer.contains(notification)) {
+        notificationContainer.removeChild(notification);
+      }
+    }, 300); // Wait for slide-out animation
+  }, 5000);
+}
+
+async function deleteUser(username) {
+  if (confirm(`Are you sure you want to delete ${username}?`)) {
+    const index = users.findIndex(u => u.username === username);
+    if (index > -1) {
+      users.splice(index, 1);
+      renderUsersList();
+      renderCards();
+      await saveToServer();
+    }
+  }
+}
+
+async function addGems(username, amount) {
+  const user = users.find(u => u.username === username);
+  if (!user) return;
+  
+  // Ensure gems field exists
+  if (!user.gems) user.gems = 0;
+  
+  // Add/subtract gems (prevent negative values)
+  const newGemCount = Math.max(0, user.gems + amount);
+  const actualChange = newGemCount - user.gems;
+  user.gems = newGemCount;
+  
+  // Save and update UI
+  await saveToServer();
+  renderUsersList();
+  renderCards();
+  
+  // Show notification
+  if (actualChange > 0) {
+    showNotification(`💎 Added ${actualChange} gems to ${username}`, 'success');
+  } else if (actualChange < 0) {
+    showNotification(`💎 Removed ${Math.abs(actualChange)} gems from ${username}`, 'warning');
+  }
+}
+
+async function addNewUser() {
+  // Create add user modal
+  const addModal = document.createElement('div');
+  addModal.id = 'addModal';
+  addModal.innerHTML = `
+    <div class="modal-backdrop">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>➕ Add New User</h2>
+          <button class="close-modal">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label>Username:</label>
+            <input type="text" id="addUsername" placeholder="Enter username" required>
+          </div>
+          <div class="form-group">
+            <label>Password:</label>
+            <input type="password" id="addPassword" placeholder="Enter password" required>
+          </div>
+          <div class="form-group">
+            <label>Role:</label>
+            <select id="addRole">
+              <option value="user">User</option>
+              <option value="admin">Admin</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Starting Aura:</label>
+            <input type="number" id="addAura" value="100" min="0" max="9999">
+          </div>
+          <div class="form-actions">
+            <button class="save-btn">💾 Add User</button>
+            <button class="cancel-btn">❌ Cancel</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(addModal);
+  
+  // Add event listeners for add modal
+  const saveBtn = addModal.querySelector('.save-btn');
+  const cancelBtn = addModal.querySelector('.cancel-btn');
+  const closeBtn = addModal.querySelector('.close-modal');
+  const backdrop = addModal.querySelector('.modal-backdrop');
+  
+  function closeAddModal() {
+    document.body.removeChild(addModal);
+  }
+  
+  saveBtn.addEventListener('click', async () => {
+    const username = document.getElementById('addUsername').value.trim();
+    const password = document.getElementById('addPassword').value.trim();
+    const role = document.getElementById('addRole').value;
+    const aura = parseInt(document.getElementById('addAura').value);
+    
+    if (!username || !password) {
+      showNotification('Please fill in all required fields', 'error');
+      return;
+    }
+    
+    if (users.find(u => u.username.toLowerCase() === username.toLowerCase())) {
+      showNotification('User already exists!', 'error');
+      return;
+    }
+    
+    users.push({
+      username: username,
+      password: password,
+      aura: isNaN(aura) ? 100 : aura,
+      role: role,
+      netDailyAura: {}
+    });
+    
+    renderUsersList();
+    renderCards();
+    await saveToServer();
+    showNotification(`User "${username}" added successfully!`, 'success');
+    closeAddModal();
+  });
+  
+  cancelBtn.addEventListener('click', closeAddModal);
+  closeBtn.addEventListener('click', closeAddModal);
+  backdrop.addEventListener('click', closeAddModal);
+  addModal.querySelector('.modal-content').addEventListener('click', (e) => e.stopPropagation());
+}
+
+async function resetDailyLimits() {
+  if (confirm('Reset all daily limits for today?')) {
+    users.forEach(user => {
+      if (user.netDailyAura) {
+        Object.keys(user.netDailyAura).forEach(giver => {
+          user.netDailyAura[giver] = 0;
+        });
+      }
+    });
+    await saveToServer();
+    alert('Daily limits reset!');
+  }
+}
+
+async function resetAllAchievements() {
+  if (!confirm(' WARNING: This will reset ALL achievements and set everyone to 0 aura!\n\nThis action cannot be undone. Are you absolutely sure?')) {
+    return;
+  }
+  
+  if (!confirm(' FINAL WARNING: This will permanently delete every achievement and set all users to 0 aura!\n\nType "RESET" to confirm:')) {
+    return;
+  }
+  
+  try {
+    const res = await fetch('/api/reset-achievements', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' }
+    });
+    
+    const data = await res.json();
+    
+    if (data.success) {
+      showNotification(' All achievements and aura have been reset for all users!', 'success');
+      await loadFromServer();
+      renderCards();
+      // Refresh achievements modal if it's open
+      if (achievementsModal.style.display === 'block') {
+        renderAchievements();
+      }
+      closeSettings();
+    } else {
+      showNotification(data.error || 'Failed to reset achievements', 'error');
+    }
+  } catch (error) {
+    console.error('Error resetting achievements:', error);
+    showNotification(' Failed to reset achievements', 'error');
+  }
+}
+
+async function resetAllCustomization() {
+  if (!confirm(' WARNING: This will reset ALL customization settings for every user!\n\nThis includes:\n• All purchased backgrounds\n• All purchased name colors\n• All equipped items\n• All name tags\n\nThis action cannot be undone. Are you absolutely sure?')) {
+    return;
+  }
+  
+  if (!confirm(' FINAL WARNING: This will permanently delete every customization item and unequip everything for all users!\n\nType "RESET" to confirm:')) {
+    return;
+  }
+  
+  try {
+    // Reset customization for all users
+    users.forEach(user => {
+      // Remove all purchased items
+      user.purchasedBackgrounds = [];
+      user.purchasedNameColors = [];
+      
+      // Unequip everything
+      user.equippedBackground = null;
+      user.equippedNameColor = null;
+      user.equippedNameTag = null;
+    });
+    
+    // Save to server
+    await saveToServer();
+    
+    // Update UI
+    renderCards();
+    
+    // Refresh customization modal if it's open
+    if (cardCustomizationModal.style.display === 'block') {
+      renderNameTags();
+      renderBackgrounds();
+      renderNameColors();
+    }
+    
+    // Refresh marketplace if it's open
+    if (marketplaceModal.style.display === 'block') {
+      renderMarketplace();
+    }
+    
+    // Apply default background for current user
+    applyDashboardBackground();
+    
+    showNotification(' All customization settings have been reset for all users!', 'success');
+    closeSettings();
+  } catch (error) {
+    console.error('Error resetting customization:', error);
+    showNotification(' Failed to reset customization', 'error');
+  }
+}
+
+// Event listeners
+const settingsBtn = document.getElementById("settingsBtn");
+settingsBtn.addEventListener("click", openSettings);
+settingsModal.querySelector('.close-modal').addEventListener('click', closeSettings);
+settingsModal.querySelector('.modal-backdrop').addEventListener('click', closeSettings);
+settingsModal.querySelector('.modal-content').addEventListener('click', (e) => e.stopPropagation());
+
+// Admin Settings Tab Switching
+const adminTabBtns = settingsModal.querySelectorAll('.admin-tab-btn');
+const adminTabContents = settingsModal.querySelectorAll('.admin-tab-content');
+
+adminTabBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    // Remove active class from all tabs and contents
+    adminTabBtns.forEach(b => b.classList.remove('active'));
+    adminTabContents.forEach(c => c.classList.remove('active'));
+    
+    // Add active class to clicked tab and corresponding content
+    btn.classList.add('active');
+    const tabId = btn.dataset.tab + 'Tab';
+    const tabContent = document.getElementById(tabId);
+    if (tabContent) {
+      tabContent.classList.add('active');
+    }
+  });
+});
+
+document.querySelector('.add-user-btn').addEventListener('click', addNewUser);
+document.querySelector('.reset-daily-btn').addEventListener('click', resetDailyLimits);
+document.getElementById('resetAllAchievementsBtn').addEventListener('click', resetAllAchievements);
+document.getElementById('resetAllCustomizationBtn').addEventListener('click', resetAllCustomization);
+document.getElementById('updatesBtn').addEventListener('click', openUpdates);
+
+// Updates modal event listeners
+updatesModal.querySelector('.close-modal').addEventListener('click', closeUpdates);
+updatesModal.querySelector('.modal-backdrop').addEventListener('click', closeUpdates);
+updatesModal.querySelector('.modal-content').addEventListener('click', (e) => e.stopPropagation());
+document.getElementById('exportBtn').addEventListener('click', exportData);
+document.getElementById('importBtn').addEventListener('click', importData);
+document.getElementById('confirmImportBtn').addEventListener('click', confirmImport);
+document.getElementById('cancelImportBtn').addEventListener('click', cancelImport);
+document.getElementById('importFile').addEventListener('change', importData);
+
+// Prevent modal close when clicking inside
+settingsModal.querySelector('.modal-content').addEventListener('click', (e) => {
+  e.stopPropagation();
+});
+
+/* ======= ACHIEVEMENTS MODAL ======= */
+const achievementsBtn = document.getElementById('achievementsBtn');
+const achievementsModal = document.getElementById('achievementsModal');
+
+// Gaining Aura achievements (50)
+const gainingAchievements = [
+  { id: 'who_even_are_you', name: 'Who Even Are You', description: 'Reach 25 aura', requirement: 25 },
+  { id: 'slightly_known', name: 'Slightly Known', description: 'Reach 50 aura', requirement: 50 },
+  { id: 'lowkey_cool', name: 'Lowkey Cool', description: 'Reach 75 aura', requirement: 75 },
+  { id: 'getting_noticed', name: 'Getting Noticed', description: 'Reach 100 aura', requirement: 100 },
+  { id: 'kinda_him', name: 'Kinda Him', description: 'Reach 150 aura', requirement: 150 },
+  { id: 'respectable', name: 'Respectable', description: 'Reach 200 aura', requirement: 200 },
+  { id: 'solid_reputation', name: 'Solid Reputation', description: 'Reach 300 aura', requirement: 300 },
+  { id: 'rising_star', name: 'Rising Star', description: 'Reach 400 aura', requirement: 400 },
+  { id: 'main_character_loading', name: 'Main Character Loading', description: 'Reach 500 aura', requirement: 500 },
+  { id: 'certified_him', name: 'Certified Him', description: 'Reach 750 aura', requirement: 750 },
+  { id: 'big_w_energy', name: 'Big W Energy', description: 'Reach 1,000 aura', requirement: 1000 },
+  { id: 'fan_favorite', name: 'Fan Favorite', description: 'Reach 1,250 aura', requirement: 1250 },
+  { id: 'popular_now', name: 'Popular Now', description: 'Reach 1,500 aura', requirement: 1500 },
+  { id: 'crowd_favorite', name: 'Crowd Favorite', description: 'Reach 2,000 aura', requirement: 2000 },
+  { id: 'social_magnet', name: 'Social Magnet', description: 'Reach 2,500 aura', requirement: 2500 },
+  { id: 'aura_farming', name: 'Aura Farming', description: 'Reach 3,000 aura', requirement: 3000 },
+  { id: 'influence_growing', name: 'Influence Growing', description: 'Reach 3,500 aura', requirement: 3500 },
+  { id: 'local_celebrity', name: 'Local Celebrity', description: 'Reach 4,000 aura', requirement: 4000 },
+  { id: 'viral_energy', name: 'Viral Energy', description: 'Reach 4,500 aura', requirement: 4500 },
+  { id: 'internet_famous', name: 'Internet Famous', description: 'Reach 5,000 aura', requirement: 5000 },
+  { id: 'walking_w', name: 'Walking W', description: 'Reach 6,000 aura', requirement: 6000 },
+  { id: 'aura_beast', name: 'Aura Beast', description: 'Reach 7,000 aura', requirement: 7000 },
+  { id: 'power_player', name: 'Power Player', description: 'Reach 8,000 aura', requirement: 8000 },
+  { id: 'untouchable', name: 'Untouchable', description: 'Reach 9,000 aura', requirement: 9000 },
+  { id: 'aura_master', name: 'Aura Master', description: 'Reach 10,000 aura', requirement: 10000 },
+  { id: 'legendary_status', name: 'Legendary Status', description: 'Reach 12,000 aura', requirement: 12000 },
+  { id: 'aura_champion', name: 'Aura Champion', description: 'Reach 14,000 aura', requirement: 14000 },
+  { id: 'main_character_fr', name: 'Main Character FR', description: 'Reach 16,000 aura', requirement: 16000 },
+  { id: 'too_popular', name: 'Too Popular', description: 'Reach 18,000 aura', requirement: 18000 },
+  { id: 'aura_titan', name: 'Aura Titan', description: 'Reach 20,000 aura', requirement: 20000 },
+  { id: 'mythical_being', name: 'Mythical Being', description: 'Reach 22,000 aura', requirement: 22000 },
+  { id: 'aura_overlord', name: 'Aura Overlord', description: 'Reach 24,000 aura', requirement: 24000 },
+  { id: 'untouchable_legend', name: 'Untouchable Legend', description: 'Reach 26,000 aura', requirement: 26000 },
+  { id: 'aura_empire_owner', name: 'Aura Empire Owner', description: 'Reach 28,000 aura', requirement: 28000 },
+  { id: 'living_legend', name: 'Living Legend', description: 'Reach 30,000 aura', requirement: 30000 },
+  { id: 'aura_ascended', name: 'Aura Ascended', description: 'Reach 32,000 aura', requirement: 32000 },
+  { id: 'higher_being', name: 'Higher Being', description: 'Reach 34,000 aura', requirement: 34000 },
+  { id: 'aura_immortal', name: 'Aura Immortal', description: 'Reach 36,000 aura', requirement: 36000 },
+  { id: 'reality_breaker', name: 'Reality Breaker', description: 'Reach 38,000 aura', requirement: 38000 },
+  { id: 'aura_transcended', name: 'Aura Transcended', description: 'Reach 40,000 aura', requirement: 40000 },
+  { id: 'god_mode', name: 'God Mode', description: 'Reach 42,000 aura', requirement: 42000 },
+  { id: 'beyond_reality', name: 'Beyond Reality', description: 'Reach 44,000 aura', requirement: 44000 },
+  { id: 'aura_deity', name: 'Aura Deity', description: 'Reach 46,000 aura', requirement: 46000 },
+  { id: 'universe_favorite', name: 'Universe Favorite', description: 'Reach 48,000 aura', requirement: 48000 },
+  { id: 'almost_divine', name: 'Almost Divine', description: 'Reach 49,000 aura', requirement: 49000 },
+  { id: 'ultimate_aura_god', name: 'Ultimate Aura God', description: 'Reach 50,000 aura 👑', requirement: 50000 },
+  { id: 'beyond_god_tier', name: 'Beyond God Tier', description: 'Reach 60,000 aura', requirement: 60000 },
+  { id: 'infinite_aura_being', name: 'Infinite Aura Being', description: 'Reach 75,000 aura', requirement: 75000 },
+  { id: 'multiverse_icon', name: 'Multiverse Icon', description: 'Reach 100,000 aura', requirement: 100000 },
+  { id: 'the_aura_itself', name: 'The Aura Itself', description: 'Reach 250,000 aura 🌀', requirement: 250000 }
+];
+
+// Giving Aura achievements (50)
+const givingAchievements = [
+  { id: 'certified_glazer', name: 'Certified Glazer', description: 'Give 25 aura', requirement: 25 },
+  { id: 'nice_guy_arc', name: 'Nice Guy Arc', description: 'Give 50 aura', requirement: 50 },
+  { id: 'hype_starter', name: 'Hype Starter', description: 'Give 75 aura', requirement: 75 },
+  { id: 'small_w_support', name: 'Small W Support', description: 'Give 100 aura', requirement: 100 },
+  { id: 'glaze_lite', name: 'Glaze Lite', description: 'Give 150 aura', requirement: 150 },
+  { id: 'kindness_dlc', name: 'Kindness DLC', description: 'Give 200 aura', requirement: 200 },
+  { id: 'aura_drip', name: 'Aura Drip', description: 'Give 300 aura', requirement: 300 },
+  { id: 'mini_sponsor', name: 'Mini Sponsor', description: 'Give 400 aura', requirement: 400 },
+  { id: 'early_investor', name: 'Early Investor', description: 'Give 500 aura', requirement: 500 },
+  { id: 'aura_donator', name: 'Aura Donator', description: 'Give 750 aura', requirement: 750 },
+  { id: 'big_supporter', name: 'Big Supporter', description: 'Give 1,000 aura', requirement: 1000 },
+  { id: 'glaze_factory', name: 'Glaze Factory', description: 'Give 1,250 aura', requirement: 1250 },
+  { id: 'aura_plug', name: 'Aura Plug', description: 'Give 1,500 aura', requirement: 1500 },
+  { id: 'good_vibes_only', name: 'Good Vibes Only', description: 'Give 2,000 aura', requirement: 2000 },
+  { id: 'generous_era', name: 'Generous Era', description: 'Give 2,500 aura', requirement: 2500 },
+  { id: 'community_carry', name: 'Community Carry', description: 'Give 3,000 aura', requirement: 3000 },
+  { id: 'aura_supplier', name: 'Aura Supplier', description: 'Give 3,500 aura', requirement: 3500 },
+  { id: 'philanthropist', name: 'Philanthropist', description: 'Give 4,000 aura', requirement: 4000 },
+  { id: 'charity_streamer', name: 'Charity Streamer', description: 'Give 4,500 aura', requirement: 4500 },
+  { id: 'aura_banker', name: 'Aura Banker', description: 'Give 5,000 aura', requirement: 5000 },
+  { id: 'sponsor_arc', name: 'Sponsor Arc', description: 'Give 6,000 aura', requirement: 6000 },
+  { id: 'big_bank_energy', name: 'Big Bank Energy', description: 'Give 7,000 aura', requirement: 7000 },
+  { id: 'unlimited_support', name: 'Unlimited Support', description: 'Give 8,000 aura', requirement: 8000 },
+  { id: 'aura_machine', name: 'Aura Machine', description: 'Give 9,000 aura', requirement: 9000 },
+  { id: 'mrbeast_mode', name: 'MrBeast Mode', description: 'Give 10,000 aura', requirement: 10000 },
+  { id: 'god_tier_glazer', name: 'God Tier Glazer', description: 'Give 12,000 aura', requirement: 12000 },
+  { id: 'aura_overload', name: 'Aura Overload', description: 'Give 14,000 aura', requirement: 14000 },
+  { id: 'infinite_kindness', name: 'Infinite Kindness', description: 'Give 16,000 aura', requirement: 16000 },
+  { id: 'support_legend', name: 'Support Legend', description: 'Give 18,000 aura', requirement: 18000 },
+  { id: 'aura_tycoon', name: 'Aura Tycoon', description: 'Give 20,000 aura', requirement: 20000 },
+  { id: 'billionaire_mindset', name: 'Billionaire Mindset', description: 'Give 22,000 aura', requirement: 22000 },
+  { id: 'aura_distributor_3000', name: 'Aura Distributor 3000', description: 'Give 24,000 aura', requirement: 24000 },
+  { id: 'global_supporter', name: 'Global Supporter', description: 'Give 26,000 aura', requirement: 26000 },
+  { id: 'aura_empire', name: 'Aura Empire', description: 'Give 28,000 aura', requirement: 28000 },
+  { id: 'mega_donator', name: 'Mega Donator', description: 'Give 30,000 aura', requirement: 30000 },
+  { id: 'limit_breaker', name: 'Limit Breaker', description: 'Give 32,000 aura', requirement: 32000 },
+  { id: 'aura_kingpin', name: 'Aura Kingpin', description: 'Give 34,000 aura', requirement: 34000 },
+  { id: 'support_overlord', name: 'Support Overlord', description: 'Give 36,000 aura', requirement: 36000 },
+  { id: 'glaze_supreme', name: 'Glaze Supreme', description: 'Give 38,000 aura', requirement: 38000 },
+  { id: 'universal_support', name: 'Universal Support', description: 'Give 40,000 aura', requirement: 40000 },
+  { id: 'almost_too_nice', name: 'Almost Too Nice', description: 'Give 49,000 aura', requirement: 49000 },
+  { id: 'maximum_glaze', name: 'MAXIMUM GLAZE', description: 'Give 50,000 aura', requirement: 50000 },
+  { id: 'beyond_human_kindness', name: 'Beyond Human Kindness', description: 'Give 55,000 aura', requirement: 55000 },
+  { id: 'aura_myth', name: 'Aura Myth', description: 'Give 60,000 aura', requirement: 60000 },
+  { id: 'the_chosen_supporter', name: 'The Chosen Supporter', description: 'Give 75,000 aura', requirement: 75000 },
+  { id: 'eternal_aura_source', name: 'Eternal Aura Source', description: 'Give 100,000 aura', requirement: 100000 }
+];
+
+// Achievements modal functionality
+achievementsBtn.addEventListener('click', openAchievements);
+achievementsModal.querySelector('.close-modal').addEventListener('click', closeAchievements);
+achievementsModal.querySelector('.modal-backdrop').addEventListener('click', closeAchievements);
+achievementsModal.querySelector('.modal-content').addEventListener('click', (e) => e.stopPropagation());
+
+// Marketplace modal functionality
+const marketplaceBtn = document.getElementById('marketplaceBtn');
+const marketplaceModal = document.getElementById('marketplaceModal');
+
+function openMarketplace() {
+  marketplaceModal.style.display = 'block';
+  
+  // Update gem count display
+  const user = users.find(u => u.username === currentUser.username);
+  const gemCountElement = document.getElementById('userGemCount');
+  if (gemCountElement && user) {
+    gemCountElement.textContent = user.gems || 0;
+  }
+  
+  renderMarketplace();
+}
+
+function closeMarketplace() {
+  marketplaceModal.style.display = 'none';
+}
+
+marketplaceBtn.addEventListener('click', openMarketplace);
+marketplaceModal.querySelector('.close-modal').addEventListener('click', closeMarketplace);
+marketplaceModal.querySelector('.modal-backdrop').addEventListener('click', closeMarketplace);
+marketplaceModal.querySelector('.modal-content').addEventListener('click', (e) => e.stopPropagation());
+
+// Marketplace backgrounds data
+const marketplaceBackgrounds = [
+  {
+    id: 'sunset_blaze',
+    name: 'Sunset Blaze',
+    price: 200,
+    gradient: 'linear-gradient(135deg, #ff6b6b, #ffd93d)'
+  },
+  {
+    id: 'ocean_depths',
+    name: 'Ocean Depths',
+    price: 200,
+    gradient: 'linear-gradient(135deg, #667eea, #764ba2)'
+  },
+  {
+    id: 'forest_glow',
+    name: 'Forest Glow',
+    price: 200,
+    gradient: 'linear-gradient(135deg, #56ab2f, #a8e063)'
+  },
+  {
+    id: 'galaxy_nebula',
+    name: 'Galaxy Nebula',
+    price: 200,
+    gradient: 'linear-gradient(135deg, #8e2de2, #4a00e0)'
+  },
+  {
+    id: 'golden_luxury',
+    name: 'Golden Luxury',
+    price: 200,
+    gradient: 'linear-gradient(135deg, #f7971e, #ffd200)'
+  },
+  {
+    id: 'arctic_frost',
+    name: 'Arctic Frost',
+    price: 200,
+    gradient: 'linear-gradient(135deg, #89f7fe, #66a6ff)'
+  },
+  {
+    id: 'cherry_blossom',
+    name: 'Cherry Blossom',
+    price: 200,
+    gradient: 'linear-gradient(135deg, #ff9a9e, #fecfef)'
+  },
+  {
+    id: 'midnight_void',
+    name: 'Midnight Void',
+    price: 200,
+    gradient: 'linear-gradient(135deg, #000000, #434343)'
+  },
+  {
+    id: 'aurora_borealis',
+    name: 'Aurora Borealis',
+    price: 200,
+    gradient: 'linear-gradient(135deg, #00c9ff, #92fe9d)'
+  },
+  {
+    id: 'volcanic_lava',
+    name: 'Volcanic Lava',
+    price: 200,
+    gradient: 'linear-gradient(135deg, #ff416c, #ff4b2b)'
+  },
+  {
+    id: 'crystal_cave',
+    name: 'Crystal Cave',
+    price: 300,
+    gradient: 'linear-gradient(135deg, #e0c3fc, #8ec5fc)'
+  },
+  {
+    id: 'desert_dunes',
+    name: 'Desert Dunes',
+    price: 300,
+    gradient: 'linear-gradient(135deg, #f2994a, #f2c94c)'
+  },
+  {
+    id: 'tropical_paradise',
+    name: 'Tropical Paradise',
+    price: 300,
+    gradient: 'linear-gradient(135deg, #43e97b, #38f9d7)'
+  },
+  {
+    id: 'cosmic_dust',
+    name: 'Cosmic Dust',
+    price: 300,
+    gradient: 'linear-gradient(135deg, #654ea3, #eaafc8)'
+  },
+  {
+    id: 'autumn_leaves',
+    name: 'Autumn Leaves',
+    price: 300,
+    gradient: 'linear-gradient(135deg, #ff9a56, #ff6a88)'
+  },
+  {
+    id: 'electric_storm',
+    name: 'Electric Storm',
+    price: 300,
+    gradient: 'linear-gradient(135deg, #4facfe, #00f2fe)'
+  },
+  {
+    id: 'rose_garden',
+    name: 'Rose Garden',
+    price: 300,
+    gradient: 'linear-gradient(135deg, #f093fb, #f5576c)'
+  },
+  {
+    id: 'mint_fresh',
+    name: 'Mint Fresh',
+    price: 300,
+    gradient: 'linear-gradient(135deg, #00cdac, #8ddad5)'
+  },
+  {
+    id: 'solar_flare',
+    name: 'Solar Flare',
+    price: 300,
+    gradient: 'linear-gradient(135deg, #f83600, #f9d423)'
+  },
+  {
+    id: 'ocean_waves',
+    name: 'Ocean Waves',
+    price: 300,
+    gradient: 'linear-gradient(135deg, #1e3c72, #2a5298)'
+  }
+];
+
+// Marketplace name colors data
+const marketplaceNameColors = [
+  {
+    id: 'crimson_red',
+    name: 'Crimson Red',
+    price: 100,
+    color: '#dc143c'
+  },
+  {
+    id: 'ocean_blue',
+    name: 'Ocean Blue',
+    price: 100,
+    color: '#0066cc'
+  },
+  {
+    id: 'forest_green',
+    name: 'Forest Green',
+    price: 100,
+    color: '#228b22'
+  },
+  {
+    id: 'royal_purple',
+    name: 'Royal Purple',
+    price: 100,
+    color: '#7851a9'
+  },
+  {
+    id: 'golden_yellow',
+    name: 'Golden Yellow',
+    price: 100,
+    color: '#ffd700'
+  },
+  {
+    id: 'hot_pink',
+    name: 'Hot Pink',
+    price: 100,
+    color: '#ff69b4'
+  },
+  {
+    id: 'electric_blue',
+    name: 'Electric Blue',
+    price: 100,
+    color: '#00bfff'
+  },
+  {
+    id: 'neon_green',
+    name: 'Neon Green',
+    price: 100,
+    color: '#39ff14'
+  },
+  {
+    id: 'sunset_orange',
+    name: 'Sunset Orange',
+    price: 100,
+    color: '#ff6b35'
+  },
+  {
+    id: 'cyber_cyan',
+    name: 'Cyber Cyan',
+    price: 100,
+    color: '#00ffff'
+  },
+  {
+    id: 'lavender_dream',
+    name: 'Lavender Dream',
+    price: 100,
+    color: '#e6e6fa'
+  },
+  {
+    id: 'blood_red',
+    name: 'Blood Red',
+    price: 100,
+    color: '#8b0000'
+  },
+  {
+    id: 'toxic_green',
+    name: 'Toxic Green',
+    price: 100,
+    color: '#00ff00'
+  },
+  {
+    id: 'deep_purple',
+    name: 'Deep Purple',
+    price: 100,
+    color: '#4b0082'
+  },
+  {
+    id: 'fire_red',
+    name: 'Fire Red',
+    price: 100,
+    color: '#ff4500'
+  },
+  {
+    id: 'ice_blue',
+    name: 'Ice Blue',
+    price: 100,
+    color: '#B0E0E6'
+  },
+  {
+    id: 'shadow_black',
+    name: 'Shadow Black',
+    price: 100,
+    color: '#1A1A1A'
+  },
+  {
+    id: 'chocolate_brown',
+    name: 'Chocolate Brown',
+    price: 100,
+    color: '#7B3F00'
+  },
+  {
+    id: 'steel_gray',
+    name: 'Steel Gray',
+    price: 100,
+    color: '#71797E'
+  },
+  {
+    id: 'lime_green',
+    name: 'Lime Green',
+    price: 100,
+    color: '#32CD32'
+  }
+];
+
+function renderMarketplace() {
+  const marketplaceBackgroundsGrid = document.getElementById('marketplaceBackgroundsGrid');
+  const marketplaceNameColorsGrid = document.getElementById('marketplaceNameColorsGrid');
+  marketplaceBackgroundsGrid.innerHTML = '';
+  marketplaceNameColorsGrid.innerHTML = '';
+  
+  // Get current user data
+  const user = users.find(u => u.username === currentUser.username);
+  const userGems = user.gems || 0;
+  const purchasedBackgrounds = user.purchasedBackgrounds || [];
+  const equippedBackground = user.equippedBackground || null;
+  const purchasedNameColors = user.purchasedNameColors || [];
+  const equippedNameColor = user.equippedNameColor || null;
+  
+  // Render backgrounds
+  marketplaceBackgrounds.forEach(background => {
+    const isPurchased = purchasedBackgrounds.includes(background.id);
+    const isEquipped = equippedBackground === background.id;
+    const canAfford = userGems >= background.price;
+    
+    const marketplaceItem = createMarketplaceBackgroundItem(background, isPurchased, isEquipped, canAfford);
+    marketplaceBackgroundsGrid.appendChild(marketplaceItem);
+  });
+  
+  // Render name colors
+  marketplaceNameColors.forEach(nameColor => {
+    const isPurchased = purchasedNameColors.includes(nameColor.id);
+    const isEquipped = equippedNameColor === nameColor.id;
+    const canAfford = userGems >= nameColor.price;
+    
+    const marketplaceItem = createMarketplaceNameColorItem(nameColor, isPurchased, isEquipped, canAfford);
+    marketplaceNameColorsGrid.appendChild(marketplaceItem);
+  });
+}
+
+function createMarketplaceBackgroundItem(background, isPurchased, isEquipped, canAfford) {
+  const marketplaceItem = document.createElement('div');
+  marketplaceItem.className = `marketplace-item ${isPurchased ? 'purchased' : ''}`;
+  
+  marketplaceItem.innerHTML = `
+    ${isPurchased ? '<div class="status-badge">OWNED</div>' : ''}
+    <div class="background-preview" style="background: ${background.gradient}"></div>
+    <div class="item-name">${background.name}</div>
+    <div class="item-price">${background.price} 💎</div>
+    ${!isPurchased ? 
+      `<button class="buy-btn" onclick="buyBackground('${background.id}', ${background.price})" ${!canAfford ? 'disabled' : ''}>
+        ${canAfford ? 'Buy Now' : 'Insufficient Gems'}
+      </button>` :
+      '<div class="owned-status">OWNED</div>'
+    }
+  `;
+  
+  return marketplaceItem;
+}
+
+function createMarketplaceNameColorItem(nameColor, isPurchased, isEquipped, canAfford) {
+  const marketplaceItem = document.createElement('div');
+  marketplaceItem.className = `marketplace-item ${isPurchased ? 'purchased' : ''}`;
+  
+  marketplaceItem.innerHTML = `
+    ${isPurchased ? '<div class="status-badge">OWNED</div>' : ''}
+    <div class="color-preview" style="background: ${nameColor.color}; color: ${nameColor.color};">Sample</div>
+    <div class="item-name">${nameColor.name}</div>
+    <div class="item-price">${nameColor.price} 💎</div>
+    ${!isPurchased ? 
+      `<button class="buy-btn" onclick="buyNameColor('${nameColor.id}', ${nameColor.price})" ${!canAfford ? 'disabled' : ''}>
+        ${canAfford ? 'Buy Now' : 'Insufficient Gems'}
+      </button>` :
+      '<div class="owned-status">OWNED</div>'
+    }
+  `;
+  
+  return marketplaceItem;
+}
+
+async function buyNameColor(nameColorId, price) {
+  const user = users.find(u => u.username === currentUser.username);
+  
+  if (user.gems < price) {
+    showNotification('❌ Insufficient gems!', 'error');
+    return;
+  }
+  
+  if (!user.purchasedNameColors) {
+    user.purchasedNameColors = [];
+  }
+  
+  if (user.purchasedNameColors.includes(nameColorId)) {
+    showNotification('❌ Already purchased!', 'error');
+    return;
+  }
+  
+  // Deduct gems and add to purchased name colors
+  user.gems -= price;
+  user.purchasedNameColors.push(nameColorId);
+  
+  // Save to server
+  await saveToServer();
+  
+  // Update UI
+  renderMarketplace();
+  renderCards();
+  
+  // Update gem count in marketplace header
+  const gemCountElement = document.getElementById('userGemCount');
+  if (gemCountElement) {
+    gemCountElement.textContent = user.gems || 0;
+  }
+  
+  showNotification(`✅ Purchased name color for ${price} gems!`, 'success');
+}
+
+async function equipNameColor(nameColorId) {
+  const user = users.find(u => u.username === currentUser.username);
+  
+  if (!user.purchasedNameColors || !user.purchasedNameColors.includes(nameColorId)) {
+    showNotification('❌ Name color not purchased!', 'error');
+    return;
+  }
+  
+  // Determine action and itemId
+  const action = user.equippedNameColor === nameColorId ? 'unequip' : 'equip';
+  const itemId = action === 'unequip' ? null : nameColorId;
+  
+  try {
+    // Call the customization API with WebSocket broadcasting
+    const requestBody = {
+      username: currentUser.username,
+      customizationType: 'nameColor',
+      itemId: itemId,
+      action: action
+    };
+    console.log('Sending request:', requestBody);
+    
+    const res = await fetch('/api/customization', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(requestBody)
+    });
+    
+    console.log('Response status:', res.status);
+    const data = await res.json();
+    console.log('Response data:', data);
+    
+    if (data.success) {
+      // Update local data immediately (WebSocket will also update other users)
+      user.equippedNameColor = itemId;
+      
+      // Update UI
+      renderMarketplace();
+      renderCards();
+      
+      // Refresh customization modal if open
+      if (cardCustomizationModal.style.display === 'block') {
+        renderNameColors();
+      }
+      
+      // Show local notification (WebSocket will show live notification to others)
+      if (action === 'equip') {
+        const nameColor = marketplaceNameColors.find(c => c.id === nameColorId);
+        showNotification(`🎨 Equipped: ${nameColor.name}`, 'success');
+      } else {
+        showNotification('🎨 Name color unequipped', 'success');
+      }
+    } else {
+      showNotification(data.error || 'Failed to update name color', 'error');
+    }
+  } catch (error) {
+    console.error('Error updating name color:', error);
+    showNotification('❌ Failed to update name color', 'error');
+  }
+}
+
+async function buyBackground(backgroundId, price) {
+  const user = users.find(u => u.username === currentUser.username);
+  
+  if (user.gems < price) {
+    showNotification('❌ Insufficient gems!', 'error');
+    return;
+  }
+  
+  if (!user.purchasedBackgrounds) {
+    user.purchasedBackgrounds = [];
+  }
+  
+  if (user.purchasedBackgrounds.includes(backgroundId)) {
+    showNotification('❌ Already purchased!', 'error');
+    return;
+  }
+  
+  // Deduct gems and add to purchased backgrounds
+  user.gems -= price;
+  user.purchasedBackgrounds.push(backgroundId);
+  
+  // Save to server
+  await saveToServer();
+  
+  // Update UI
+  renderMarketplace();
+  renderCards();
+  
+  // Update gem count in marketplace header
+  const gemCountElement = document.getElementById('userGemCount');
+  if (gemCountElement) {
+    gemCountElement.textContent = user.gems || 0;
+  }
+  
+  showNotification(`✅ Purchased background for ${price} gems!`, 'success');
+}
+
+async function equipBackground(backgroundId) {
+  const user = users.find(u => u.username === currentUser.username);
+  
+  if (!user.purchasedBackgrounds || !user.purchasedBackgrounds.includes(backgroundId)) {
+    showNotification('❌ Background not purchased!', 'error');
+    return;
+  }
+  
+  // Unequip if already equipped, otherwise equip new
+  if (user.equippedBackground === backgroundId) {
+    user.equippedBackground = null;
+    showNotification('🎨 Background unequipped', 'success');
+  } else {
+    user.equippedBackground = backgroundId;
+    const background = marketplaceBackgrounds.find(b => b.id === backgroundId);
+    showNotification(`🎨 Equipped: ${background.name}`, 'success');
+  }
+  
+  // Save to server and update UI
+  await saveToServer();
+  renderMarketplace();
+  renderCards();
+  
+  // Apply dashboard background if current user equipped background
+  if (currentUser.username === user.username) {
+    applyDashboardBackground();
+  }
+  
+  // Refresh card customization if open
+  if (cardCustomizationModal.style.display === 'block') {
+    renderBackgrounds();
+  }
+}
+
+// Tab switching
+document.querySelectorAll('.achievement-tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const tabName = btn.dataset.tab;
+    
+    // Update button states
+    document.querySelectorAll('.achievement-tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    
+    // Update content visibility
+    document.querySelectorAll('.achievement-tab-content').forEach(content => content.classList.remove('active'));
+    document.getElementById(`${tabName}Tab`).classList.add('active');
+  });
+});
+
+// Card customization tab switching
+document.querySelectorAll('.customization-tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const tabName = btn.dataset.tab;
+    
+    // Update button states
+    document.querySelectorAll('.customization-tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    
+    // Update content visibility
+    document.querySelectorAll('.customization-tab-content').forEach(content => content.classList.remove('active'));
+    document.getElementById(`${tabName}Tab`).classList.add('active');
+  });
+});
+
+// Marketplace tab switching
+document.querySelectorAll('.marketplace-tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const tabName = btn.dataset.tab;
+    
+    // Update button states
+    document.querySelectorAll('.marketplace-tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    
+    // Update content visibility
+    document.querySelectorAll('.marketplace-tab-content').forEach(content => content.classList.remove('active'));
+    document.getElementById(`${tabName}Tab`).classList.add('active');
+  });
+});
+
+function openAchievements() {
+  achievementsModal.style.display = 'block';
+  renderAchievements();
+}
+
+function closeAchievements() {
+  achievementsModal.style.display = 'none';
+}
+
+// Card Customization Modal
+const cardCustomizationBtn = document.getElementById('cardCustomizationBtn');
+const cardCustomizationModal = document.getElementById('cardCustomizationModal');
+
+cardCustomizationBtn.addEventListener('click', openCardCustomization);
+cardCustomizationModal.querySelector('.close-modal').addEventListener('click', closeCardCustomization);
+cardCustomizationModal.querySelector('.modal-backdrop').addEventListener('click', closeCardCustomization);
+cardCustomizationModal.querySelector('.modal-content').addEventListener('click', (e) => e.stopPropagation());
+
+function openCardCustomization() {
+  cardCustomizationModal.style.display = 'block';
+  renderNameTags();
+  renderBackgrounds();
+  renderNameColors();
+}
+
+function closeCardCustomization() {
+  cardCustomizationModal.style.display = 'none';
+}
+
+function renderNameTags() {
+  const nameTagGrid = document.getElementById('nameTagGrid');
+  nameTagGrid.innerHTML = '';
+  
+  // Get current user data
+  const user = users.find(u => u.username === currentUser.username);
+  const userAchievements = user.achievements || [];
+  const totalGiven = user.totalGiven || 0;
+  const currentAura = user.aura || 0;
+  const equippedNameTag = user.equippedNameTag || null;
+  
+  // Filter gaining achievements (based on current aura)
+  const unlockedGainingAchievements = gainingAchievements.filter(achievement => 
+    currentAura >= achievement.requirement
+  );
+  
+  // Filter giving achievements (based on total given)
+  const unlockedGivingAchievements = givingAchievements.filter(achievement => 
+    totalGiven >= achievement.requirement
+  );
+  
+  // Combine all unlocked achievements
+  const unlockedAchievements = [...unlockedGainingAchievements, ...unlockedGivingAchievements];
+  
+  // Create name tag cards for unlocked achievements
+  unlockedAchievements.forEach(achievement => {
+    const isEquipped = equippedNameTag === achievement.id;
+    const nameTagCard = createNameTagCard(achievement, isEquipped);
+    nameTagGrid.appendChild(nameTagCard);
+  });
+  
+  // If no unlocked achievements, show message
+  if (unlockedAchievements.length === 0) {
+    nameTagGrid.innerHTML = '<div style="text-align: center; color: #999; padding: 40px;">No unlocked achievements yet. Unlock achievements to equip name tags!</div>';
+  }
+}
+
+async function equipNameTag(achievementId) {
+  const user = users.find(u => u.username === currentUser.username);
+  
+  // Determine action and itemId
+  const action = user.equippedNameTag === achievementId ? 'unequip' : 'equip';
+  const itemId = action === 'unequip' ? null : achievementId;
+  
+  try {
+    // Call the customization API with WebSocket broadcasting
+    const res = await fetch('/api/customization', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        username: currentUser.username,
+        customizationType: 'nameTag',
+        itemId: itemId,
+        action: action
+      })
+    });
+    
+    const data = await res.json();
+    
+    if (data.success) {
+      // Update local data immediately (WebSocket will also update other users)
+      user.equippedNameTag = itemId;
+      
+      // Update UI
+      renderNameTags();
+      renderCards(); // Re-render cards to show updated name tag
+      
+      // Show local notification (WebSocket will show live notification to others)
+      if (action === 'equip') {
+        const achievement = gainingAchievements.find(a => a.id === achievementId) || givingAchievements.find(a => a.id === achievementId);
+        showNotification(`🏷️ Equipped: ${achievement.name}`, 'success');
+      } else {
+        showNotification('🏷️ Name tag unequipped', 'success');
+      }
+    } else {
+      showNotification(data.error || 'Failed to update name tag', 'error');
+    }
+  } catch (error) {
+    console.error('Error updating name tag:', error);
+    showNotification('❌ Failed to update name tag', 'error');
+  }
+}
+
+function createNameTagCard(achievement, isEquipped) {
+  const nameTagCard = document.createElement('div');
+  nameTagCard.className = `name-tag-card ${isEquipped ? 'equipped' : ''}`;
+  
+  nameTagCard.innerHTML = `
+    <div class="name-tag-status">${isEquipped ? '✅' : '🏷️'}</div>
+    <div class="name-tag-name">${achievement.name}</div>
+    ${isEquipped ? 
+      '<div class="equipped-status">EQUIPPED</div>' :
+      `<button class="equip-btn" onclick="equipNameTag('${achievement.id}')">Equip</button>`
+    }
+  `;
+  
+  return nameTagCard;
+}
+
+function renderBackgrounds() {
+  const backgroundsGrid = document.getElementById('backgroundsGrid');
+  backgroundsGrid.innerHTML = '';
+  
+  // Get current user data
+  const user = users.find(u => u.username === currentUser.username);
+  const purchasedBackgrounds = user.purchasedBackgrounds || [];
+  const equippedBackground = user.equippedBackground || null;
+  
+  // Filter purchased backgrounds
+  const ownedBackgrounds = marketplaceBackgrounds.filter(background => 
+    purchasedBackgrounds.includes(background.id)
+  );
+  
+  // Create background cards for purchased backgrounds
+  ownedBackgrounds.forEach(background => {
+    const isEquipped = equippedBackground === background.id;
+    const backgroundCard = createBackgroundCard(background, isEquipped);
+    backgroundsGrid.appendChild(backgroundCard);
+  });
+  
+  // If no purchased backgrounds, show message
+  if (ownedBackgrounds.length === 0) {
+    backgroundsGrid.innerHTML = '<div style="text-align: center; color: #999; padding: 40px;">No purchased backgrounds yet. Visit the marketplace to buy backgrounds!</div>';
+  }
+}
+
+function renderNameColors() {
+  const nameColorsGrid = document.getElementById('nameColorsGrid');
+  nameColorsGrid.innerHTML = '';
+  
+  // Get current user data
+  const user = users.find(u => u.username === currentUser.username);
+  const purchasedNameColors = user.purchasedNameColors || [];
+  const equippedNameColor = user.equippedNameColor || null;
+  
+  // Filter purchased name colors
+  const ownedNameColors = marketplaceNameColors.filter(nameColor => 
+    purchasedNameColors.includes(nameColor.id)
+  );
+  
+  // Create name color cards for purchased name colors
+  ownedNameColors.forEach(nameColor => {
+    const isEquipped = equippedNameColor === nameColor.id;
+    const nameColorCard = createNameColorCard(nameColor, isEquipped);
+    nameColorsGrid.appendChild(nameColorCard);
+  });
+  
+  // If no purchased name colors, show message
+  if (ownedNameColors.length === 0) {
+    nameColorsGrid.innerHTML = '<div style="text-align: center; color: #999; padding: 40px;">No purchased name colors yet. Visit the marketplace to buy name colors!</div>';
+  }
+}
+
+function createBackgroundCard(background, isEquipped) {
+  const backgroundCard = document.createElement('div');
+  backgroundCard.className = `background-item ${isEquipped ? 'equipped' : ''}`;
+  
+  backgroundCard.innerHTML = `
+    ${isEquipped ? '<div class="status-badge">EQUIPPED</div>' : ''}
+    <div class="background-preview" style="background: ${background.gradient}"></div>
+    <div class="item-name">${background.name}</div>
+    ${isEquipped ? 
+      '<div class="equipped-status">EQUIPPED</div>' :
+      `<button class="equip-btn" onclick="equipBackground('${background.id}')">Equip</button>`
+    }
+  `;
+  
+  return backgroundCard;
+}
+
+function createNameColorCard(nameColor, isEquipped) {
+  const nameColorCard = document.createElement('div');
+  nameColorCard.className = `background-item ${isEquipped ? 'equipped' : ''}`;
+  
+  nameColorCard.innerHTML = `
+    ${isEquipped ? '<div class="status-badge">EQUIPPED</div>' : ''}
+    <div class="color-preview" style="background: ${nameColor.color}; color: ${nameColor.color};">Sample</div>
+    <div class="item-name">${nameColor.name}</div>
+    ${isEquipped ? 
+      '<div class="equipped-status">EQUIPPED</div>' :
+      `<button class="equip-btn" onclick="equipNameColor('${nameColor.id}')">Equip</button>`
+    }
+  `;
+  
+  return nameColorCard;
+}
+
+function unequipAllNameTags() {
+  // Remove equipped name tag from current user
+  const user = users.find(u => u.username === currentUser.username);
+  if (user && user.equippedNameTag) {
+    user.equippedNameTag = null;
+    saveToServer();
+    renderNameTags();
+    renderCards();
+    showNotification('🏷️ Name tag unequipped!', 'success');
+  } else {
+    showNotification('No name tag equipped to unequip', 'info');
+  }
+}
+
+function unequipAllBackgrounds() {
+  // Remove equipped background from current user
+  const user = users.find(u => u.username === currentUser.username);
+  if (user && user.equippedBackground) {
+    user.equippedBackground = null;
+    saveToServer();
+    renderBackgrounds();
+    renderCards();
+    applyDashboardBackground(); // Remove background from dashboard
+    showNotification('🎨 Background unequipped!', 'success');
+  } else {
+    showNotification('No background equipped to unequip', 'info');
+  }
+}
+
+function unequipAllNameColors() {
+  // Remove equipped name color from current user
+  const user = users.find(u => u.username === currentUser.username);
+  if (user && user.equippedNameColor) {
+    user.equippedNameColor = null;
+    saveToServer();
+    renderNameColors();
+    renderCards();
+    showNotification('🎨 Name color unequipped!', 'success');
+  } else {
+    showNotification('No name color equipped to unequip', 'info');
+  }
+}
+
+function renderAchievements() {
+  const gainingGrid = document.getElementById('gainingGrid');
+  const givingGrid = document.getElementById('givingGrid');
+  
+  gainingGrid.innerHTML = '';
+  givingGrid.innerHTML = '';
+  
+  // Get current user data
+  const user = users.find(u => u.username === currentUser.username);
+  const userAchievements = user.achievements || [];
+  const totalGiven = user.totalGiven || 0;
+  const totalReceived = user.totalReceived || 0;
+  const currentAura = user.aura || 0;
+  
+  // Render gaining achievements
+  gainingAchievements.forEach(achievement => {
+    const isUnlocked = currentAura >= achievement.requirement;
+    const achievementCard = createAchievementCard(achievement, isUnlocked);
+    gainingGrid.appendChild(achievementCard);
+  });
+  
+  // Render giving achievements
+  givingAchievements.forEach(achievement => {
+    const isUnlocked = totalGiven >= achievement.requirement;
+    const achievementCard = createAchievementCard(achievement, isUnlocked);
+    givingGrid.appendChild(achievementCard);
+  });
+}
+
+function createAchievementCard(achievement, isUnlocked) {
+  const achievementCard = document.createElement('div');
+  achievementCard.className = `achievement-card ${isUnlocked ? 'unlocked' : 'locked'}`;
+  
+  achievementCard.innerHTML = `
+    <div class="achievement-status">${isUnlocked ? '✅' : '🔒'}</div>
+    <div class="achievement-name">${achievement.name}</div>
+    <div class="achievement-description">${achievement.description}</div>
+  `;
+  
+  return achievementCard;
+}
+
+function showAchievementUnlock(achievement) {
+  // Create achievement unlock notification
+  const achievementNotification = document.createElement('div');
+  achievementNotification.className = 'achievement-unlock-notification';
+  achievementNotification.innerHTML = `
+    <div class="achievement-unlock-content">
+      <div class="achievement-unlock-icon">🏆</div>
+      <div class="achievement-unlock-text">
+        <div class="achievement-unlock-title">Achievement Unlocked!</div>
+        <div class="achievement-unlock-name">${achievement.name}</div>
+      </div>
+    </div>
+  `;
+  
+  // Add styles
+  const style = document.createElement('style');
+  style.textContent = `
+    .achievement-unlock-notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: linear-gradient(135deg, rgba(255,215,0,0.9), rgba(255,165,0,0.9));
+      backdrop-filter: blur(15px);
+      border: 2px solid gold;
+      border-radius: 15px;
+      padding: 15px 20px;
+      box-shadow: 0 10px 30px rgba(255,215,0,0.4);
+      z-index: 4000;
+      animation: slideInRight 0.5s ease-out;
+      max-width: 350px;
+    }
+    
+    .achievement-unlock-content {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    
+    .achievement-unlock-icon {
+      font-size: 32px;
+      animation: bounce 1s infinite;
+    }
+    
+    .achievement-unlock-text {
+      color: white;
+    }
+    
+    .achievement-unlock-title {
+      font-weight: bold;
+      font-size: 14px;
+      margin-bottom: 5px;
+    }
+    
+    .achievement-unlock-name {
+      font-size: 16px;
+      font-weight: 600;
+    }
+    
+    @keyframes bounce {
+      0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+      40% { transform: translateY(-10px); }
+      60% { transform: translateY(-5px); }
+    }
+    
+    @keyframes slideInRight {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    
+    @keyframes slideOutRight {
+      from { transform: translateX(0); opacity: 1; }
+      to { transform: translateX(100%); opacity: 0; }
+    }
+  `;
+  document.head.appendChild(style);
+  
+  // Add to page
+  document.body.appendChild(achievementNotification);
+  
+  // Remove after 5 seconds
+  setTimeout(() => {
+    achievementNotification.style.animation = 'slideOutRight 0.5s ease-in';
+    setTimeout(() => {
+      if (document.body.contains(achievementNotification)) {
+        document.body.removeChild(achievementNotification);
+      }
+    }, 500);
+  }, 5000);
+}
+
+/* ======= CHART.JS GRAPH ======= */
+function updateChart(){
+  try {
+    const canvas = document.getElementById('auraChart');
+    if (!canvas) {
+      console.error('Chart canvas not found');
+      return;
+    }
+    
+    const ctx = canvas.getContext('2d');
+    if (!ctx) {
+      console.error('Could not get canvas context');
+      return;
+    }
+    
+    // Handle case where selectedUser might be undefined
+    if (!selectedUser) {
+      console.error('No user selected for chart');
+      return;
+    }
+    
+    console.log('Updating chart for user:', selectedUser.username, 'Current aura:', selectedUser.aura);
+    
+    // Get real aura history for selected user
+    const userHistory = auraHistory[selectedUser.username] || [];
+    
+    // If no history, create initial entry
+    if (userHistory.length === 0) {
+      addAuraHistoryEntry(selectedUser.username, selectedUser.aura);
+    }
+    
+    const history = auraHistory[selectedUser.username];
+    const labels = history.map(entry => entry.time);
+    const data = history.map(entry => entry.aura);
+    
+    if(chart) {
+      chart.destroy();
+      chart = null;
+    }
+    
+    chart = new Chart(ctx, {
+      type: 'line',
+      data: { 
+        labels: labels, 
+        datasets:[{ 
+          label: 'Aura Over Time', 
+          data: data, 
+          borderColor:'#00f6ff', 
+          backgroundColor:'rgba(0,246,255,0.2)', 
+          tension:0.4,
+          fill: true,
+          pointBackgroundColor: '#00f6ff',
+          pointBorderColor: '#fff',
+          pointBorderWidth: 2,
+          pointRadius: 5
+        }] 
+      },
+      options:{ 
+        responsive:true, 
+        maintainAspectRatio: false,
+        plugins:{ 
+          legend:{ display:false } 
+        }, 
+        scales:{ 
+          y:{ 
+            beginAtZero:true,
+            grid: {
+              color: 'rgba(255,255,255,0.1)'
+            },
+            ticks: {
+              color: 'rgba(255,255,255,0.8)'
+            }
+          },
+          x: {
+            grid: {
+              color: 'rgba(255,255,255,0.1)'
+            },
+            ticks: {
+              color: 'rgba(255,255,255,0.8)',
+              maxRotation: 45,
+              minRotation: 45
+            }
+          }
+        } 
+      }
+    });
+    
+    console.log('Chart created successfully with', data.length, 'data points');
+  } catch (error) {
+    console.error('Error creating chart:', error);
+  }
+}
+
+/* ======= PWA FUNCTIONALITY ======= */
+// Register service worker
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js')
+      .then(registration => {
+        console.log('SW registered: ', registration);
+        
+        // Check for updates
+        registration.addEventListener('updatefound', () => {
+          const newWorker = registration.installing;
+          newWorker.addEventListener('statechange', () => {
+            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+              // New content is available
+              showNotification(' New version available! Refresh to update.', 'success');
+            }
+          });
+        });
+      })
+      .catch(registrationError => {
+        console.log('SW registration failed: ', registrationError);
+      });
+  });
+}
+
+// PWA Install functionality
+let deferredPrompt;
+const installButton = document.createElement('button');
+installButton.textContent = ' Install App';
+installButton.style.cssText = `
+  position: fixed;
+  bottom: 80px;
+  right: 20px;
+  background: linear-gradient(135deg, #4CAF50, #45a049);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 20px;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+  z-index: 1000;
+  display: none;
+  transition: all 0.3s ease;
+  min-height: 44px;
+  min-width: 44px;
+  touch-action: manipulation;
+`;
+
+installButton.addEventListener('click', () => {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then((choiceResult) => {
+      if (choiceResult.outcome === 'accepted') {
+        console.log('User accepted the A2HS prompt');
+        showNotification(' App installed successfully!', 'success');
+        installButton.style.display = 'none';
+      } else {
+        console.log('User dismissed the A2HS prompt');
+      }
+      deferredPrompt = null;
+    });
+  }
+});
+
+document.body.appendChild(installButton);
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  installButton.style.display = 'block';
+});
+
+// Handle app installed event
+window.addEventListener('appinstalled', (evt) => {
+  console.log('a2hs installed');
+  installButton.style.display = 'none';
+  showNotification(' Aura Tracker is now installed!', 'success');
+});
+
+// Handle online/offline status
+window.addEventListener('online', () => {
+  showNotification(' Back online!', 'success');
+});
+
+window.addEventListener('offline', () => {
+  showNotification(' You are offline. Some features may be limited.', 'warning');
+});
+
+// Add touch-friendly swipe gestures for mobile
+let touchStartX = 0;
+let touchStartY = 0;
+let touchEndX = 0;
+let touchEndY = 0;
+
+document.addEventListener('touchstart', (e) => {
+  touchStartX = e.changedTouches[0].screenX;
+  touchStartY = e.changedTouches[0].screenY;
+}, { passive: true });
+
+document.addEventListener('touchend', (e) => {
+  touchEndX = e.changedTouches[0].screenX;
+  touchEndY = e.changedTouches[0].screenY;
+  handleSwipe();
+}, { passive: true });
+
+function handleSwipe() {
+  const swipeThreshold = 50;
+  const xDiff = touchStartX - touchEndX;
+  const yDiff = touchStartY - touchEndY;
+  
+  // Check if it's a horizontal swipe
+  if (Math.abs(xDiff) > Math.abs(yDiff)) {
+    if (Math.abs(xDiff) > swipeThreshold) {
+      if (xDiff > 0) {
+        // Swipe left - could be used for navigation
+        console.log('Swiped left');
+      } else {
+        // Swipe right - could be used for navigation
+        console.log('Swiped right');
+      }
+    }
+  }
+  
+  // Check if it's a vertical swipe
+  if (Math.abs(yDiff) > swipeThreshold) {
+    if (yDiff > 0) {
+      // Swipe up - could open panels
+      console.log('Swiped up');
+    } else {
+      // Swipe down - could close panels
+      if (slidePanel.classList.contains('open')) {
+        slidePanel.classList.remove('open');
+      }
+    }
+  }
+}
+
+</script>
+
+</body>
+</html>

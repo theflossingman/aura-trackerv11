@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Achievements</title>
+    <script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+    <h1>Achievement Debug Test</h1>
+    <div id="logs"></div>
+    
+    <script>
+        const socket = io();
+        const logs = document.getElementById('logs');
+        
+        function log(message) {
+            console.log(message);
+            logs.innerHTML += '<p>' + new Date().toLocaleTimeString() + ': ' + message + '</p>';
+        }
+        
+        socket.on('connect', () => {
+            log('Connected to server');
+            socket.emit('authenticate', 'Max');
+        });
+        
+        socket.on('achievementUnlock', (data) => {
+            log('Achievement unlock received: ' + JSON.stringify(data, null, 2));
+            if (data.achievements && data.achievements.length > 0) {
+                data.achievements.forEach((achievement, index) => {
+                    log(`Achievement ${index + 1}: ${achievement.name} (${achievement.id})`);
+                });
+            }
+        });
+        
+        socket.on('auraUpdate', (data) => {
+            log('Aura update received: ' + JSON.stringify(data, null, 2));
+        });
+        
+        // Test giving aura
+        function testGiveAura() {
+            fetch('/api/give-aura', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    giverUsername: 'Max', 
+                    receiverUsername: 'Marco', 
+                    amount: 25 
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                log('Give aura response: ' + JSON.stringify(data, null, 2));
+            })
+            .catch(error => {
+                log('Error giving aura: ' + error.message);
+            });
+        }
+    </script>
+    
+    <button onclick="testGiveAura()">Test Give 25 Aura (Max to Marco)</button>
+</body>
+</html>
